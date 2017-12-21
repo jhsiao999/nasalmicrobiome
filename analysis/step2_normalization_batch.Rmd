@@ -1,0 +1,114 @@
+---
+title: "Normalization and batch correction"
+author: "JNP"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+## Summary
+
+We preprocessed the data to remove technical biases due to PCR amplification and sequencing run. The analysis proceeds in two sequential steps:
+
+1. Normalization: apply Cumulative Sum Scaling as described in [Paulson et al, 2015](https://www.nature.com/articles/nmeth.2658).
+
+2. Batch correction: fit a linear model to each OTU at the speciees level, then estimate and remove batch effect due to sequencin run for each OTU. 
+
+*After aggregating reads at the species levek, we are left with 616 features in 197 samples.*
+
+$~$
+
+---
+
+## Package
+
+```{r}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(metagenomeSeq)
+library(CountClust)
+```
+
+## Loading data
+
+Read in filtered data.
+
+```{r}
+MRobj = readRDS("../data/nasal_filtered.rds")
+MRobj
+```
+
+$~$
+
+---
+
+## Normalization
+
+We calculate the normalization scaling factors using cumulative sum scaling, see [Paulson et al](https://www.nature.com/articles/nmeth.2658) for more information.
+
+```{r, eval=F}
+MRobj = cumNorm(MRobj)
+```
+
+$~$
+
+---
+
+## Batch correction
+
+Batch correction for sequencing run effect is performed for each taxonomy level. Here, we focus on species level analysis and perform batch correcdtion on the raw counts at teh species level. Details for batch correction are described in the manuscript. 
+
+```{r, eval=F}
+obj <- aggTax(MRobj,lvl="Species")
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+
+counts <- t(MRcounts(obj,norm=FALSE,log=FALSE))
+batchcorrect_counts <- BatchCorrectedCounts(counts,
+                                         batch_lab = pData(MRobj)$seqrun,
+                                         use_parallel=FALSE)
+counts = t(batchcorrect_counts)
+
+assayData(MRobj)[["counts"]] = counts
+
+MRobj
+```
+
+Save normalized, batch corrected counts.
+
+```{r, eval=F}
+saveRDS(MRobj, file = "../data/nasal_filtered_normed_batchcorrected.rds")
+```
+
+$~$
+
+---
+
+## Session Info
+
+```{r, echo = F}
+sessionInfo()
+```
