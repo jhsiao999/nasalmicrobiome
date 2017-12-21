@@ -37,15 +37,9 @@ Data processing steps are as follows:
 
 3. [Filtering samples and OTUs](step1_filtering.html)
 
-4. [Batch correction](step2_gradesOfMembership.html)
+4. [Normalization and Batch correction](step2_normalization_batch.html)
 
-5. [Normalization](step3_stacked_bar_plots.html)
-
-
-* The count table outputted from `QIIME` is saved in `data/rdata/nsal_2_23_17.rdata`. 
-
-* The final filtered data is saved as an `MRobj` in `data/rdata/data-fitlered.rdata`.
-
+5. [Grades of membership model](step3_gradesOfMembership.html)
 
 
 ---
