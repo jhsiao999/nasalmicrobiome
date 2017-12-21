@@ -1,0 +1,62 @@
+---
+title: "Assigning Appropriate Taxonomy and Filtering"
+author: "JNP"
+date: "12/10/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="/Users/paulsoj1/Dropbox/Projects/collaborations/nasalMicrobiome/forWorkflowr")
+```
+
+
+# Loading data
+
+```{r}
+library(metagenomeSeq)
+MRobj = readRDS("./nasal.rds")
+```
+
+# Filter samples with low depth
+
+```{r}
+hist(log2(colSums(MRobj)),xlab="Log sequencing depth")
+abline(v=log2(1000))
+MRobj = filterData(MRobj,depth=1000,present=1)
+```
+
+# Filter OTUs not present
+
+```{r}
+nmat = MRcounts(MRobj)
+keep = which( rowSums(nmat>0)>=5 | rowSums(nmat>=20)>0 )
+MRobj=MRobj[keep,]
+```
+
+# Overview of the data
+
+```{r}
+MRobj
+
+# Display number of unique organisms we find within each clade. ps. 2 kingdom is due to the unassigned
+sapply(fData(MRobj),function(i)length(unique(i)))
+
+# number unassigned
+length(which(fData(MRobj)[,1]=="Unassigned"))
+```
+
+
+# Filtering Unassigned
+
+```{r}
+MRobj = MRobj[- which(fData(MRobj)[,1]=="Unassigned"),]
+saveRDS(MRobj,file="nasal_filtered.rds")
+```
+
+
+# Session Information
+
+```{r}
+sessionInfo()
+```

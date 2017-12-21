@@ -1,0 +1,82 @@
+---
+title: "Nasal GOM"
+author: "JNP"
+date: "12/6/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="/Users/paulsoj1/Dropbox/Projects/collaborations/nasalMicrobiome/forWorkflowr")
+library(knitr)
+library(kableExtra)
+library(dplyr)
+```
+
+
+# Loading data
+
+First we load the data and calculate the normalization scaling factors using cumulative sum scaling, see [Paulson et al](https://www.nature.com/articles/nmeth.2658) for more information.
+
+```{r}
+suppressMessages(library(metagenomeSeq))
+suppressMessages(library(CountClust))
+MRobj = readRDS("./nasal_filtered.rds")
+MRobj = cumNorm(MRobj)
+```
+
+# Performing batch correction
+
+Next, we perform species level batch correction on the raw counts. We then perform normalization on the batch corrected reads. We will update this section with an overview of the batch correction and reasoning.
+
+```{r}
+obj <- aggTax(MRobj,lvl="Species")
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+
+counts <- t(MRcounts(obj,norm=FALSE,log=FALSE))
+batchcorrect_counts <- BatchCorrectedCounts(counts,
+                                         batch_lab = pData(MRobj)$seqrun,
+                                         use_parallel=FALSE)
+counts = t(batchcorrect_counts)
+```
+
+# Clustering 
+
+Next we perform clustering
+
+```{r}
+# nmat or counts?
+counts_clust <- FitGoM(t(counts), K=c(2), tol=0.00001)
+
+cct <- counts_clust[[1]]$omega
+rowMaxs = sapply(seq(nrow(cct)),function(i){
+    seq(along=cct[i,])[cct[i,]==max(cct[i,])]
+  })
+rowMaxs = unlist(rowMaxs)
+uniqueGroups = unique(unlist(rowMaxs))
+groupIds = split(seq(rowMaxs),factor(rowMaxs))
+
+cl = rep("1",sum(sapply(groupIds,length))); cl[groupIds[[2]]] = 2
+
+cbind(groupIDs = cl,round(cct,3)) %>% kable %>%
+  kable_styling()
+```
+
+# Preserve data with GOM
+
+Next we save the dataset with the grades of membership.
+
+```{r}
+MRobj2 = MRobj
+assayData(MRobj2)[["counts"]] = counts
+featureData(MRobj2) = AnnotatedDataFrame(data.frame(Species=rownames(counts)))
+pData(MRobj)$GOM = cl
+pData(MRobj2)$GOM = cl
+save(MRobj2,MRobj,file="./nasal_filtered_GOM.rdata")
+```
+
+# Session Info
+
+```{r}
+sessionInfo()
+```

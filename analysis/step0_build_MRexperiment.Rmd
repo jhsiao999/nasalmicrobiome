@@ -1,0 +1,86 @@
+---
+title: "Building an MRexperiment object"
+author: "JNP"
+date: "12/20/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="/Users/paulsoj1/Dropbox/Projects/collaborations/nasalMicrobiome/forWorkflowr")
+```
+
+## Reading in the counts
+
+We grab the QIIME output as well as the annotated taxonomy and the phenotype information and merge them together into an MRexperiment object.
+
+```{r}
+suppressMessages(library(biomformat,quietly = TRUE))
+suppressMessages(library(metagenomeSeq,quietly = TRUE))
+suppressMessages(library(dplyr,quietly = TRUE))
+
+# reading in counts
+counts = read_biom("./otu_table.biom")
+counts = biom2MRexperiment(counts)
+cnames = sapply(strsplit(colnames(counts),"\\."),function(i)ifelse(length(i)>1,i[2],i[1]))
+colnames(counts) = cnames
+```
+
+# Taxonomy
+
+Next we read in the QIIME taxonomy and attach it to the MRexperiment object. It requires a bit of cleanup due to the file structure.
+```{r}
+fd = read.csv("./GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt",sep=";",stringsAsFactors=FALSE,header=FALSE)
+species = sapply(strsplit(fd[,7],"\t"),function(i)i[1]) %>% ifelse(is.na(.),yes=" s__",no=.)
+fd[,7] = species
+rnames = sapply(strsplit(fd[,1],"\t"),function(i)i[1])
+rownames(fd) = rnames
+fd[,1] = sapply(strsplit(fd[,1],"\t"),function(i)i[2]) %>% ifelse(is.na(.),yes=" Unassigned",no=.)
+colnames(fd) = c("Kingdom","Phylum","Class","Order","Family","Genus","Species")
+
+for(i in seq(fd)){
+  fd[,i] = gsub(" ","",fd[,i])
+}
+for(i in seq(fd)){
+  lvl = tolower(strsplit(colnames(fd)[i],"")[[1]][1])
+  fd[which(is.na(fd[,i]) | fd[,i]==""),i] = paste(lvl,"__",sep="")
+}
+
+for(i in rev(seq(fd)[-1])){
+  lvl = paste(tolower(strsplit(colnames(fd)[i],"")[[1]][1]),"__",sep="")
+  if(any(fd[,i] == lvl)){
+    nrows = which(fd[,i] == lvl)
+    feel  = fd[nrows,seq(i)]
+    feel  = sapply(seq(nrow(feel)),function(j)paste(feel[j,seq(i)],collapse=";"))
+    fd[nrows,i] = feel
+  }
+}
+for(i in seq(fd)) fd[grep("Unassigned",fd[,i]),i] = "Unassigned"
+fd = fd[match(rownames(counts),rownames(fd)),]
+fData(counts) = fd
+```
+
+# Metadata
+
+Next we read in the metadata and attach it to the MRexperiment object
+
+```{r}
+pd = read.csv("./metadata.tsv",sep = "\t",stringsAsFactors=FALSE)
+rownames(pd) = pd[,1]
+pd = pd[match(colnames(counts),rownames(pd)),]
+pData(counts) = pd
+```
+
+# Saving the file
+
+Lastly, we save the object as an RDS file.
+
+```{r}
+saveRDS(counts,file="nasal.rds")
+```
+
+# SessionInfo
+
+```{r}
+sessionInfo()
+```

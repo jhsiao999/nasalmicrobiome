@@ -33,7 +33,13 @@ Data processing steps are as follows:
 
 1. [QIIME for read alignment](../data/log_20171207080411.txt)
 
-2. [Filtering samples and OTUs](../docs/taxonomy-n-filtering.html)
+2. [QIIME output to MRexperiment object](step0_build_MRexperiment.html)
+
+3. [Filtering samples and OTUs](taxonomy-n-filtering.html)
+
+4. [Batch correction](step2_gradesOfMembership.html)
+
+5. [Normalization](step3_stacked_bar_plots.html)
 
 
 * The count table outputted from `QIIME` is saved in `data/rdata/nsal_2_23_17.rdata`. 
