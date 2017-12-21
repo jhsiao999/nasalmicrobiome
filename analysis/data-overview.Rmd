@@ -33,9 +33,9 @@ Data processing steps are as follows:
 
 1. [QIIME for read alignment](log_20171207080411.txt)
 
-2. [QIIME output to MRexperiment object](step0_build_MRexperiment.html)
+2. [Build MRexperiment object](step0_build_MRexperiment.html)
 
-3. [Filtering samples and OTUs](taxonomy-n-filtering.html)
+3. [Filtering samples and OTUs](step1_filtering.html)
 
 4. [Batch correction](step2_gradesOfMembership.html)
 
