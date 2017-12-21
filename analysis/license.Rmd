@@ -5,15 +5,6 @@ output:
     toc: false
 ---
 
-What license are you using for your code? See [choosealicense.com][choose] for
-help deciding. And don't forget to update the file `LICENSE` in the root of your
-Git repo.
+Copyright of materials in this repo belongs to the authors. The code, data, and figures in this repository are not to be shared, distributed, or tweaked for reuse either for commercial or uncommercial purposes.
 
-What license are you using for the written content on your site? It is
-traditional to choose a [Creative Commons][cc] license for this type of content.
 
-[choose]: http://choosealicense.com/
-[cc]: https://creativecommons.org/choose/
-
-How should others cite your work? Don't forget to update the file `CITATION` in
-the root of your Git repo.
