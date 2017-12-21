@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
 
 ## Introduction/Summary
 
-Here we combine QIIME output, OTU taxonomy labels, and sample phenotype labels into a `metagenomeSeq` `MRexperiment` object `nasal.rds`. The sources of data are
+Here we combine QIIME output, OTU taxonomy labels, and sample phenotype labels into a `metagenomeSeq` `MRexperiment` object `nasal_raw.rds`. The sources of data are
 
 * QIIME output: `otu_table.biom`
 
@@ -137,8 +137,8 @@ dim(pd)
 
 Lastly, we save the object as an RDS file. 
 
-```{r}
-saveRDS(counts, file="../data/nasal.rds")
+```{r, eval = F}
+saveRDS(counts, file="../data/nasal_raw.rds")
 ```
 
 ---
