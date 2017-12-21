@@ -1,0 +1,165 @@
+---
+title: "Assigning Taxonomy and Filtering"
+author: "Joseph Paulson"
+date: "2017-12-10"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Loading packages
+
+```{r, warning=F, message=F}
+library(metagenomeSeq)
+```
+
+---
+
+## Data
+
+Take output from QIIME
+
+---
+
+## Assign taxonomy
+
+Load data (output from `QIMME`)
+
+```{r}
+set.seed(1)
+load("../data/rdata/nasal_2_23_17.rdata")
+```
+
+Cleaning up QIIME output.
+
+* Convert feature names to chararacter.
+
+* For each OTU, convert `NA` to `Unassigned`
+
+```{r}
+colnames(fData(MRobj)) <- c("Kingdom","Phylum","Class","Order","Family","Genus","Species")
+for(i in seq(fData(MRobj))) fData(MRobj)[,i] = as.character(fData(MRobj)[,i])
+
+fd <- fData(MRobj)
+for(i in seq(fd)){
+  lvl = tolower(strsplit(colnames(fd)[i],"")[[1]][1])
+  fd[which(is.na(fd[,i]) | fd[,i]==""),i] = paste(lvl,"__",sep="")
+}
+for(i in rev(seq(fd))){
+  lvl = paste(tolower(strsplit(colnames(fd)[i],"")[[1]][1]),"__",sep="")
+  if(any(fd[,i]=="" | fd[,i] == lvl)){
+    nrows = which(fd[,i]=="" | fd[,i] == lvl)
+    feel  = fd[nrows,seq(i)]
+    feel  = sapply(seq(nrow(feel)),function(j)paste(feel[j,seq(i)],collapse=";"))
+    fData(MRobj)[nrows,i] = feel
+  }
+}
+
+for(i in seq(fData(MRobj))) fData(MRobj)[,i] = as.character(fData(MRobj)[,i])
+for(i in seq(fData(MRobj))) fData(MRobj)[grep("Unassigned",fData(MRobj)[,i]),i] = "Unassigned"
+```
+
+$~$
+
+---
+
+## Filter samples with low depth
+
+```{r, echo =F}
+hist(log2(colSums(MRobj)),xlab="Log sequencing depth",
+     main = "log2 sequencing depth")
+abline(v=log2(1000), col="red")
+```
+
+$~$
+
+* Filter out samples with total count < 1000.
+
+* Filter out OTUs with total count across samples < 1. In other words, present in at least one sample.
+
+```{r}
+MRobj = filterData(MRobj,depth=1000,present=1)
+```
+
+$~$
+
+---
+
+## Filter OTUs not present
+
+$~$
+
+* OTUs present (> 0 read) in 5 or more samples
+
+* OTUs that are quantified with > 20 reads in at least one sample
+
+```{r}
+nmat <- MRcounts(MRobj)
+keep <- which( rowSums(nmat>0)>=5 | rowSums(nmat>=20)>0 )
+MRobj <- MRobj[keep,]
+```
+
+$~$
+
+After filtering, we have 5,521 features and 197 samples.
+
+```{r}
+MRobj
+```
+
+$~$
+
+Display number of unique organisms we find within each clade. ps. 2 kingdom is due to the unassigned
+
+```{r}
+sapply(fData(MRobj),function(i)length(unique(i)))
+```
+
+$~$
+
+Number of features unassigned at the Kindom level. (1098 out of total 5521 OTUs)
+
+```{r}
+length(which(fData(MRobj)[,1]=="Unassigned"))
+```
+
+$~$
+
+save data to a rdata file.
+
+```{r, eval=FALSE, echo = TRUE}
+save(MRobj, file = "../data/data-filtered.rdata")
+```
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
