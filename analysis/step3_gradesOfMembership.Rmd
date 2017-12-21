@@ -1,0 +1,123 @@
+---
+title: "Grades of membership model"
+author: "JNP"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+## Summary
+
+Load data post filtering, normalization and batch correction (`nasal_filtered_normed_batchcorrected.rds`).
+
+Apply grades of membership model using `CountClust`.
+
+$~$
+
+---
+
+## Package
+
+```{r}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(metagenomeSeq)
+library(CountClust)
+```
+
+## Loading data
+
+Read in filtered data.
+
+```{r}
+MRobj = readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
+MRobj
+```
+
+$~$
+
+---
+
+## Clustering 
+
+Apply `CountClust` to fit grades of membership model. 
+
+```{r, eval = F}
+set.seed(17)
+counts_clust <- FitGoM(t(counts), K=c(2), tol=0.00001)
+#saveRDS(counts_clust, file = "../data/count-clust.rds")
+```
+
+Load previous computed count_clust results.
+
+```{r}
+counts_clust <- readRDS(file = "../data/count-clust.rds")
+
+cct <- counts_clust[[1]]$omega
+rowMaxs = sapply(seq(nrow(cct)),function(i){
+    seq(along=cct[i,])[cct[i,]==max(cct[i,])]
+  })
+rowMaxs = unlist(rowMaxs)
+uniqueGroups = unique(unlist(rowMaxs))
+groupIds = split(seq(rowMaxs),factor(rowMaxs))
+
+cl = rep("1",sum(sapply(groupIds,length))); cl[groupIds[[2]]] = 2
+
+table(cl)
+# cbind(groupIDs = cl,round(cct,3)) %>% kable %>%
+#   kable_styling()
+```
+
+$~$
+
+---
+
+## Preserve data with GOM
+
+Next we save the dataset with the sample clustering labels
+
+```{r, eval =F}
+MRobj2 = MRobj
+assayData(MRobj2)[["counts"]] = counts
+featureData(MRobj2) = AnnotatedDataFrame(data.frame(Species=rownames(counts)))
+pData(MRobj)$GOM = cl
+pData(MRobj2)$GOM = cl
+
+save(MRobj2, MRobj, file="../data/nasal_GOM.rdata")
+```
+
+
+$~$
+
+
+---
+
+## Session Info
+
+```{r, echo = F}
+sessionInfo()
+```
