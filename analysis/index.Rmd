@@ -10,6 +10,9 @@ Share results of nasal microbiome project.
 * [Processing reads - from reads to count table](data-overview.html)
 
 
+* Cluster characteristics
+    * [Stacked bar plot of abundance](stacked_bar_plots.html)
+
 ---
 
 * Shiny site for our exploratory data analysis
