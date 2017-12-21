@@ -324,7 +324,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-12-21</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 96dab2a</p>
+<p><strong>Code version:</strong> d436804</p>
 <hr />
 <div id="introductionsummary" class="section level2">
 <h2>Introduction/Summary</h2>
@@ -340,9 +340,7 @@ shared across the workflowr files. -->
 </div>
 <div id="setting-up" class="section level2">
 <h2>Setting up</h2>
-<pre class="r"><code>library(knitr)
-library(Biobase)
-library(biomformat)
+<pre class="r"><code>library(biomformat)
 library(metagenomeSeq)
 library(dplyr)</code></pre>
 <hr />
@@ -392,84 +390,6 @@ for(i in rev(seq(fd)[-1])){
 for(i in seq(fd)) fd[grep(&quot;Unassigned&quot;,fd[,i]),i] = &quot;Unassigned&quot;
 fd = fd[match(rownames(counts),rownames(fd)),]
 fData(counts) = fd</code></pre>
-<p>Preview first 6 rows of the feature (OTU) labels.</p>
-<pre class="r"><code>kable(head(fd))</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th align="left">Kingdom</th>
-<th align="left">Phylum</th>
-<th align="left">Class</th>
-<th align="left">Order</th>
-<th align="left">Family</th>
-<th align="left">Genus</th>
-<th align="left">Species</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>denovo0</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Bacteroidetes</td>
-<td align="left">c__[Saprospirae]</td>
-<td align="left">o__[Saprospirales]</td>
-<td align="left">f__Chitinophagaceae</td>
-<td align="left">k__Bacteria;p<strong>Bacteroidetes;c</strong>[Saprospirae];o__[Saprospirales];f__Chitinophagaceae;g__</td>
-<td align="left">k__Bacteria;p<strong>Bacteroidetes;c</strong>[Saprospirae];o__[Saprospirales];f__Chitinophagaceae;g<strong>;s</strong></td>
-</tr>
-<tr class="even">
-<td>denovo1</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Firmicutes</td>
-<td align="left">c__Bacilli</td>
-<td align="left">o__Lactobacillales</td>
-<td align="left">f__Lactobacillaceae</td>
-<td align="left">g__Pediococcus</td>
-<td align="left">s__acidilactici</td>
-</tr>
-<tr class="odd">
-<td>denovo2</td>
-<td align="left">Unassigned</td>
-<td align="left">Unassigned</td>
-<td align="left">Unassigned</td>
-<td align="left">Unassigned</td>
-<td align="left">Unassigned</td>
-<td align="left">Unassigned</td>
-<td align="left">Unassigned</td>
-</tr>
-<tr class="even">
-<td>denovo3</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Firmicutes</td>
-<td align="left">c__Bacilli</td>
-<td align="left">o__Lactobacillales</td>
-<td align="left">f__Streptococcaceae</td>
-<td align="left">g__Streptococcus</td>
-<td align="left">k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Streptococcaceae;g<strong>Streptococcus;s</strong></td>
-</tr>
-<tr class="odd">
-<td>denovo4</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Gammaproteobacteria</td>
-<td align="left">o__Oceanospirillales</td>
-<td align="left">f__Halomonadaceae</td>
-<td align="left">g__Halomonas</td>
-<td align="left">k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Oceanospirillales;f__Halomonadaceae;g<strong>Halomonas;s</strong></td>
-</tr>
-<tr class="even">
-<td>denovo5</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Betaproteobacteria</td>
-<td align="left">o__Burkholderiales</td>
-<td align="left">f__Oxalobacteraceae</td>
-<td align="left">k__Bacteria;p__Proteobacteria;c__Betaproteobacteria;o__Burkholderiales;f__Oxalobacteraceae;g__</td>
-<td align="left">k__Bacteria;p__Proteobacteria;c__Betaproteobacteria;o__Burkholderiales;f__Oxalobacteraceae;g<strong>;s</strong></td>
-</tr>
-</tbody>
-</table>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
@@ -511,17 +431,17 @@ attached base packages:
 other attached packages:
  [1] dplyr_0.7.4          metagenomeSeq_1.20.1 RColorBrewer_1.1-2  
  [4] glmnet_2.0-13        foreach_1.4.4        Matrix_1.2-12       
- [7] limma_3.34.4         biomformat_1.6.0     Biobase_2.38.0      
-[10] BiocGenerics_0.24.0  knitr_1.17          
+ [7] limma_3.34.4         Biobase_2.38.0       BiocGenerics_0.24.0 
+[10] biomformat_1.6.0    
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14       highr_0.6          bindr_0.1         
- [4] compiler_3.4.1     git2r_0.20.0       plyr_1.8.4        
- [7] bitops_1.0-6       iterators_1.0.9    tools_3.4.1       
-[10] zlibbioc_1.24.0    digest_0.6.13      tibble_1.3.4      
-[13] jsonlite_1.5       evaluate_0.10.1    rhdf5_2.22.0      
-[16] lattice_0.20-35    pkgconfig_2.0.1    rlang_0.1.4       
-[19] yaml_2.1.16        bindrcpp_0.2       stringr_1.2.0     
+ [1] Rcpp_0.12.14       bindr_0.1          compiler_3.4.1    
+ [4] git2r_0.20.0       plyr_1.8.4         bitops_1.0-6      
+ [7] iterators_1.0.9    tools_3.4.1        zlibbioc_1.24.0   
+[10] digest_0.6.13      tibble_1.3.4       jsonlite_1.5      
+[13] evaluate_0.10.1    rhdf5_2.22.0       lattice_0.20-35   
+[16] pkgconfig_2.0.1    rlang_0.1.4        yaml_2.1.16       
+[19] bindrcpp_0.2       stringr_1.2.0      knitr_1.17        
 [22] gtools_3.5.0       caTools_1.17.1     rprojroot_1.2     
 [25] grid_3.4.1         glue_1.2.0         R6_2.2.2          
 [28] rmarkdown_1.8      gdata_2.18.0       magrittr_1.5      
