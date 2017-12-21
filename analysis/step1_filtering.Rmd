@@ -32,7 +32,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message = F)
 
 ## Summary
 
-We excluded samples and OTUs based on the following criteria:
+We imported raw data (`nasal_raw.rds`) and excluded samples and OTUs based on the following criteria. The filtered data are saved in `nasal_filtered.rds`.
 
 *Prior to filtering, there are 42,999 features and 201 samples*
 
@@ -76,7 +76,7 @@ library(metagenomeSeq)
 ## Loading data
 
 ```{r}
-MRobj = readRDS("../data/nasal.rds")
+MRobj = readRDS("../data/nasal_raw.rds")
 MRobj
 ```
 
@@ -108,21 +108,18 @@ $~$
 
 * OTUs that are quantified with > 20 reads in at least one sample
 
+* After filtering, we have 5,521 features and 197 samples.
+
 ```{r}
 nmat = MRcounts(MRobj)
 keep = which( rowSums(nmat>0)>=5 | rowSums(nmat>=20)>0 )
 MRobj=MRobj[keep,]
+MRobj
 ```
 
 ---
 
 ## Unassigned
-
-After filtering, we have 5,521 features and 197 samples.
-
-```{r}
-MRobj
-```
 
 Number of unique organisms we find within each clade. PS. 2 at the Kindom level due to the unassigned
 
@@ -140,7 +137,7 @@ Filtering Unassigned.
 
 ```{r}
 MRobj = MRobj[- which(fData(MRobj)[,1]=="Unassigned"),]
-saveRDS(MRobj,file="../data/nasal_filtered.rds")
+#saveRDS(MRobj,file="../data/nasal_filtered.rds")
 ```
 
 After filtering, we have 4,423 features and 197 samples. 
@@ -154,7 +151,7 @@ MRobj
 4 samples were excluded from the filtered data: EM0062, E0194, EM0088, EM0053.
 
 ```{r}
-pre_filtered <- readRDS("../data/nasal.rds")
+pre_filtered <- readRDS("../data/nasal_raw.rds")
 post_filtered <- readRDS("../data/nasal_filtered.rds")
 
 excluded_samples <- setdiff(colnames(MRcounts(pre_filtered)), colnames(MRcounts(post_filtered)))
