@@ -1,0 +1,207 @@
+---
+title: "Stacked bar plots"
+author: "JNP"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+$~$
+
+---
+
+## Packages
+
+```{r}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(reshape)
+library(metagenomeSeq)
+library(ggplot2)
+```
+
+$~$
+
+---
+
+## Data
+
+```{r}
+load("../data/nasal_GOM.rdata")
+MRobj
+```
+
+$~$
+
+---
+
+## Functions
+
+```{r}
+grabGroupedMeans <- function(obj,phenotype_name,lvl,...){
+	meansOfMeans <- function(x) colMeans(prop.table(as.matrix(x),1))
+	if(length(phenotype_name)==1) pd = pData(obj)[,phenotype_name]
+	else pd = phenotype_name
+	mat= aggTax(obj,lvl=lvl,out='matrix')
+	pd = factor(pd)
+
+	groupMeans = by(t(mat),pd,meansOfMeans,simplify=TRUE)
+	groupedMeans = do.call("cbind",groupMeans)
+	colnames(groupedMeans) = levels(pd)
+	groupedMeans
+}
+
+plotBar <- function(obj, lvl, cl=colnames(obj), n=10, norm=FALSE, log=FALSE, ord=FALSE, orderby='Other',...){
+	if (class(obj) == "MRexperiment") {
+		mat = MRcounts(obj, norm = norm, log = log)
+		if(length(lvl)==1){
+			lvl = fData(obj)[,lvl]
+		}
+	}
+	else if (class(obj) == "matrix") {
+		mat = obj
+	}
+	else {
+		stop("Object needs to be either a MRexperiment object or matrix")
+	}
+	prop = prop.table(mat,2)
+	aggProp = aggregateByTaxonomy(prop,lvl,out='matrix')
+	ordIndex  = order(rowSums(aggProp),decreasing=TRUE)[1:n]
+	Other = 1-colSums(aggProp[ordIndex,])
+	aggPropSub = cbind(t(aggProp[ordIndex,]),Other)
+	if(length(unique(cl))!=nrow(aggPropSub)){
+		cl = factor(cl)
+		aggPropSub = by(aggPropSub,cl,colMeans)
+		aggPropSub = Reduce("rbind",aggPropSub)
+		rownames(aggPropSub) = levels(cl)
+		cl = levels(cl)
+	}
+	propDF = data.frame(Group=cl,aggPropSub)
+	if(ord){
+		rord = order(aggPropSub[,orderby])
+		propDF=propDF[rord,]
+		cl = reorder(cl,rord); propDF$Group = cl # ???
+	}
+	dd = melt(propDF,id.vars=c("Group"),measure.vars=colnames(propDF)[-1])
+	p=ggplot(dd,aes(Group,value,fill=variable)) + geom_bar(position="fill", stat='identity') +
+	ylab("Proportion") + 
+	scale_x_discrete(labels = cl,limits=cl)+
+	theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+	labs(fill='Taxa')
+	return(list(p=p,dd=dd))
+}
+```
+
+$~$
+
+---
+
+## Sample feature composition by clusters
+
+We display results in stacked bar plots. The vertical bars represent 197 samples grouped by clustering membership. Samples in cluster 1 are on the left, and samples in cluster 2 are on the right. Colors in each vertical bar correspond to different species. 
+
+```{r}
+MRobj2 = MRobj2[,order(pData(MRobj2)$GOM)]
+grps = grabGroupedMeans(MRobj2,'GOM','Species')
+getPalette = colorRampPalette(brewer.pal(12, "Set3"))
+tmp= MRobj2[,order(pData(MRobj2)$GOM)]
+colnames(tmp) = paste(pData(MRobj2)$GOM,colnames(MRobj2),sep="_")
+
+# pdf("../output/step4_stacked_bar_plots.Rmd/n_taxa_stacked.pdf",width=30,height=10)
+# for(i in (c(10,20,30,40)-1)){
+# 	x = plotBar(tmp,'Species',n=i)
+# 	y = x$p+ scale_fill_manual(values=getPalette(i+1),guide=FALSE)
+# 	print(y)
+# 	y = x$p+ scale_fill_manual(values=getPalette(i+1))
+# 	print(y)
+# }
+# dev.off()
+```
+
+### 9 colors
+
+```{r}
+i=9
+#for(i in (c(10,20,30,40)-1)){
+x = plotBar(tmp,'Species',n=i)
+y = x$p+ scale_fill_manual(values=getPalette(i+1),guide=FALSE)
+print(y)
+y = x$p+ scale_fill_manual(values=getPalette(i+1))
+print(y)
+#}
+```
+
+### 19 colors
+
+```{r}
+i=19
+#for(i in (c(10,20,30,40)-1)){
+x = plotBar(tmp,'Species',n=i)
+y = x$p+ scale_fill_manual(values=getPalette(i+1),guide=FALSE)
+print(y)
+y = x$p+ scale_fill_manual(values=getPalette(i+1))
+print(y)
+#}
+```
+
+
+### 29 colors
+
+```{r}
+i=29
+#for(i in (c(10,20,30,40)-1)){
+x = plotBar(tmp,'Species',n=i)
+y = x$p+ scale_fill_manual(values=getPalette(i+1),guide=FALSE)
+print(y)
+y = x$p+ scale_fill_manual(values=getPalette(i+1))
+print(y)
+#}
+```
+
+
+### 39 colors
+
+```{r}
+i=29
+#for(i in (c(10,20,30,40)-1)){
+x = plotBar(tmp,'Species',n=i)
+y = x$p+ scale_fill_manual(values=getPalette(i+1),guide=FALSE)
+print(y)
+y = x$p+ scale_fill_manual(values=getPalette(i+1))
+print(y)
+#}
+```
+
+
+---
+
+## Session information
+
+```{r, echo = F}
+sessionInfo()
+```
+
