@@ -1,36 +1,88 @@
 ---
-title: "Building an MRexperiment object"
+title: "QIIME to MRexperiment object"
 author: "JNP"
-date: "12/20/2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir="/Users/paulsoj1/Dropbox/Projects/collaborations/nasalMicrobiome/forWorkflowr")
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
 ```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+
+---
+
+## Introduction/Summary
+
+Here we combine QIIME output, OTU taxonomy labels, and sample phenotype labels into a `metagenomeSeq` `MRexperiment` object `nasal.rds`. The sources of data are
+
+* QIIME output: `otu_table.biom`
+
+* Taxonomy labels: `GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt`
+
+* Sample phenotype labels: `metadata.tsv`
+
+Raw data consists of 42,999 features (OTUs) from 201 samples. The OTUs are annotated at each taxonomy level: Kindom, Phylum, Class, Order, Family, Genus, Species, and labeled as unassigned when annotations are not available. There are 94 sample phenotypes, including primary and secondary outcomes. 
+
+$~$
+
+---
+
+## Setting up
+
+```{r}
+library(knitr)
+library(Biobase)
+library(biomformat)
+library(metagenomeSeq)
+library(dplyr)
+```
+
+---
 
 ## Reading in the counts
 
-We grab the QIIME output as well as the annotated taxonomy and the phenotype information and merge them together into an MRexperiment object.
+Import QIIME output using `biomformat`, and convert to an `MRexperiment` object using `metagenomeSeq`.
 
 ```{r}
-suppressMessages(library(biomformat,quietly = TRUE))
-suppressMessages(library(metagenomeSeq,quietly = TRUE))
-suppressMessages(library(dplyr,quietly = TRUE))
-
-# reading in counts
-counts = read_biom("./otu_table.biom")
+counts <- read_biom("../data/otu_table.biom")
 counts = biom2MRexperiment(counts)
 cnames = sapply(strsplit(colnames(counts),"\\."),function(i)ifelse(length(i)>1,i[2],i[1]))
 colnames(counts) = cnames
 ```
 
-# Taxonomy
+Raw data consists of 42,999 features and 201 samples.
 
-Next we read in the QIIME taxonomy and attach it to the MRexperiment object. It requires a bit of cleanup due to the file structure.
 ```{r}
-fd = read.csv("./GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt",sep=";",stringsAsFactors=FALSE,header=FALSE)
+dim(counts)
+```
+
+---
+
+## Taxonomy
+
+Read in the QIIME taxonomy and attach to the `MRexperiment` object. It requires a bit of cleanup due to the file structure.
+
+```{r}
+fd = read.csv("../data/GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt",sep=";",
+              stringsAsFactors=FALSE,header=FALSE)
 species = sapply(strsplit(fd[,7],"\t"),function(i)i[1]) %>% ifelse(is.na(.),yes=" s__",no=.)
 fd[,7] = species
 rnames = sapply(strsplit(fd[,1],"\t"),function(i)i[1])
@@ -60,27 +112,47 @@ fd = fd[match(rownames(counts),rownames(fd)),]
 fData(counts) = fd
 ```
 
-# Metadata
-
-Next we read in the metadata and attach it to the MRexperiment object
+Preview first 6 rows of the feature (OTU) labels.
 
 ```{r}
-pd = read.csv("./metadata.tsv",sep = "\t",stringsAsFactors=FALSE)
+kable(head(fd))
+```
+
+$~$
+
+---
+
+## Metadata
+
+Next we read in the metadata (sample phenotype labels) and attach to the `MRexperiment` object
+
+```{r}
+pd = read.csv("../data/metadata.tsv",sep = "\t",stringsAsFactors=FALSE)
 rownames(pd) = pd[,1]
 pd = pd[match(colnames(counts),rownames(pd)),]
 pData(counts) = pd
 ```
 
-# Saving the file
-
-Lastly, we save the object as an RDS file.
+There are 94 phenotype labels for the 201 samples.
 
 ```{r}
-saveRDS(counts,file="nasal.rds")
+dim(pd)
 ```
 
-# SessionInfo
+---
+
+## Saving the file
+
+Lastly, we save the object as an RDS file. 
 
 ```{r}
+saveRDS(counts, file="../data/nasal.rds")
+```
+
+---
+
+## SessionInfo
+
+```{r, echo = FALSE}
 sessionInfo()
 ```
