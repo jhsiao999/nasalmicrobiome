@@ -48,8 +48,6 @@ $~$
 ## Setting up
 
 ```{r}
-library(knitr)
-library(Biobase)
 library(biomformat)
 library(metagenomeSeq)
 library(dplyr)
@@ -110,12 +108,6 @@ for(i in rev(seq(fd)[-1])){
 for(i in seq(fd)) fd[grep("Unassigned",fd[,i]),i] = "Unassigned"
 fd = fd[match(rownames(counts),rownames(fd)),]
 fData(counts) = fd
-```
-
-Preview first 6 rows of the feature (OTU) labels.
-
-```{r}
-kable(head(fd))
 ```
 
 $~$
