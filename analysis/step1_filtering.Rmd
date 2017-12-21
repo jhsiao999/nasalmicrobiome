@@ -1,32 +1,112 @@
 ---
-title: "Assigning Appropriate Taxonomy and Filtering"
-author: "JNP"
-date: "12/10/2017"
+title: "Filtering"
+author: "Joseph Paulson"
+date: "2017-12-10"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir="/Users/paulsoj1/Dropbox/Projects/collaborations/nasalMicrobiome/forWorkflowr")
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
 ```
 
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
 
-# Loading data
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message = F)
+```
+
+---
+
+## Summary
+
+We excluded samples and OTUs based on the following criteria:
+
+*Prior to filtering, there are 42,999 features and 201 samples*
+
+1. Low sequencing depth
+    1.1. Samples with total count < 1000  
+    1.2. OTUs not present (> 0 read) in any sample  
+    1.3. Satisfies 1.1 AND 1.2
+
+*After Step 1, left with 42,982 features and 197 samples.*
+    
+2. OTUs not present
+    2.1. Present (> 0 read) in 5 or more samples in 1
+    2.2. Present and quantified with > 20 read in at least one sample
+    2.3. Satisfies 2.1 OR 2.2, otherwise excluded.
+
+*After Step 2, left with 5,521 features and 197 samples.*
+    
+3. Excluded OTUs not assigned at the Kindom level
+
+*After Step 3, left with 4,423 features and 197 samples*
+
+In the end, 4 samples/patients were excluded from the analysis. See the bottom of this page for sample demographics. 
+
+$~$
+
+Questions:
+
+1. Maybe included one patient that has ~900 total reads?
+
+2. Difference between treatment and control demographics before/after excluded these samples?
+
+
+---
+
+## Packages
 
 ```{r}
 library(metagenomeSeq)
-MRobj = readRDS("./nasal.rds")
 ```
 
-# Filter samples with low depth
+## Loading data
 
 ```{r}
-hist(log2(colSums(MRobj)),xlab="Log sequencing depth")
-abline(v=log2(1000))
-MRobj = filterData(MRobj,depth=1000,present=1)
+MRobj = readRDS("../data/nasal.rds")
+MRobj
 ```
 
-# Filter OTUs not present
+$~$
+
+---
+
+## Filter samples with low depth
+
+* Filter out samples with total count < 1000.
+
+* Filter out OTUs with total count across samples < 1. In other words, present in at least one sample.
+
+```{r}
+hist(log2(colSums(MRobj)),xlab="Log sequencing depth",
+     main = "Log sequencing depth")
+abline(v=log2(1000))
+MRobj = filterData(MRobj, depth=1000, present=1)
+MRobj
+```
+
+$~$
+
+---
+
+## Filter OTUs not present
+
+* OTUs present (> 0 read) in 5 or more samples
+
+* OTUs that are quantified with > 20 reads in at least one sample
 
 ```{r}
 nmat = MRcounts(MRobj)
@@ -34,29 +114,111 @@ keep = which( rowSums(nmat>0)>=5 | rowSums(nmat>=20)>0 )
 MRobj=MRobj[keep,]
 ```
 
-# Overview of the data
+---
+
+## Unassigned
+
+After filtering, we have 5,521 features and 197 samples.
 
 ```{r}
 MRobj
+```
 
-# Display number of unique organisms we find within each clade. ps. 2 kingdom is due to the unassigned
+Number of unique organisms we find within each clade. PS. 2 at the Kindom level due to the unassigned
+
+```{r}
 sapply(fData(MRobj),function(i)length(unique(i)))
+```
 
-# number unassigned
+Number of features unassigned at the Kindom level. (1,098 out of total 5521 OTUs)
+
+```{r}
 length(which(fData(MRobj)[,1]=="Unassigned"))
 ```
 
-
-# Filtering Unassigned
+Filtering Unassigned. 
 
 ```{r}
 MRobj = MRobj[- which(fData(MRobj)[,1]=="Unassigned"),]
-saveRDS(MRobj,file="nasal_filtered.rds")
+saveRDS(MRobj,file="../data/nasal_filtered.rds")
+```
+
+After filtering, we have 4,423 features and 197 samples. 
+
+```{r}
+MRobj
+```
+
+## Excluded sample
+
+4 samples were excluded from the filtered data: EM0062, E0194, EM0088, EM0053.
+
+```{r}
+pre_filtered <- readRDS("../data/nasal.rds")
+post_filtered <- readRDS("../data/nasal_filtered.rds")
+
+excluded_samples <- setdiff(colnames(MRcounts(pre_filtered)), colnames(MRcounts(post_filtered)))
+excluded_samples
 ```
 
 
-# Session Information
+```{r}
+colSums(MRcounts(pre_filtered))[colnames(pre_filtered) %in% c("EM0062", "E0194", "EM0088", "EM0053")]
+```
+
+Phenotypes of the 4 excluded samples.
+
+*EM0062*
+
+* Demographics: age 66, male, white, underwent cardiac surgery, studysite = 1, seqrun = 2
+
+* Primary outcome: anyinf6m (infection 6 mo. post surgery) = 1, naswabsa1 (nasal swab culture positive) = 1
+
 
 ```{r}
+pData(pre_filtered)[rownames(pData(pre_filtered)) == "EM0062",]
+```
+
+$~$
+
+*E0194*
+
+* Demographics: age 66, male, white, underwent cardiac surgery, study site = 0, seqrun = 2
+
+* Primary outcome: anyinf6m (infection 6 mo. post surgery) = 0, naswabsa1 (nasal swab culture positive) = 0
+
+```{r}
+pData(pre_filtered)[rownames(pData(pre_filtered)) == "E0194",]
+```
+
+$~$
+
+*EM0088*
+
+* Demographics: age 74, female, white, underwent cardiac surgery, studysite = 1, seqrun = 2
+
+* Primary outcome: anyinf6m (infection 6 mo. post surgery) = 1, naswabsa1 (nasal swab culture positive) = 1
+
+```{r}
+pData(pre_filtered)[rownames(pData(pre_filtered)) == "EM0088",]
+```
+
+$~$
+
+*EM0053*
+
+* Demographics: age 64, male, white, underwent cardiac surgery, studysite = 1, seqrun = 2
+
+* Primary outcome: anyinf6m (infection 6 mo. post surgery) = 1, naswabsa1 (nasal swab culture positive) = 0
+
+```{r}
+pData(pre_filtered)[rownames(pData(pre_filtered)) == "EM0053",]
+```
+
+---
+
+## Session Information
+
+```{r, echo = F}
 sessionInfo()
 ```
