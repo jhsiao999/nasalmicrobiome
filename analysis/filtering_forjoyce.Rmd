@@ -1,0 +1,66 @@
+---
+title: "Assigning Appropriate Taxonomy and Filtering"
+author: "JNP"
+date: "12/10/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Defining the appropriate taxonomy
+
+```{r}
+setwd("/Users/paulsoj1/Dropbox/Projects/collaborations/nasalMicrobiome/shinyapp/")
+set.seed(1)
+load("nasal_2_23_17.rdata")
+
+colnames(fData(MRobj)) = c("Kingdom","Phylum","Class","Order","Family","Genus","Species")
+for(i in seq(fData(MRobj))) fData(MRobj)[,i] = as.character(fData(MRobj)[,i])
+fd = fData(MRobj)
+for(i in seq(fd)){
+  lvl = tolower(strsplit(colnames(fd)[i],"")[[1]][1])
+  fd[which(is.na(fd[,i]) | fd[,i]==""),i] = paste(lvl,"__",sep="")
+}
+for(i in rev(seq(fd))){
+  lvl = paste(tolower(strsplit(colnames(fd)[i],"")[[1]][1]),"__",sep="")
+  if(any(fd[,i]=="" | fd[,i] == lvl)){
+    nrows = which(fd[,i]=="" | fd[,i] == lvl)
+    feel  = fd[nrows,seq(i)]
+    feel  = sapply(seq(nrow(feel)),function(j)paste(feel[j,seq(i)],collapse=";"))
+    fData(MRobj)[nrows,i] = feel
+  }
+}
+
+for(i in seq(fData(MRobj))) fData(MRobj)[,i] = as.character(fData(MRobj)[,i])
+for(i in seq(fData(MRobj))) fData(MRobj)[grep("Unassigned",fData(MRobj)[,i]),i] = "Unassigned"
+```
+
+# Filter samples with low depth
+
+```{r}
+hist(log2(colSums(MRobj)),xlab="Log sequencing depth")
+abline(v=log2(1000))
+MRobj = filterData(MRobj,depth=1000,present=1)
+```
+
+# Filter OTUs not present
+
+```{r}
+nmat = MRcounts(MRobj)
+keep = which( rowSums(nmat>0)>=5 | rowSums(nmat>=20)>0 )
+MRobj=MRobj[keep,]
+```
+
+
+```{r}
+MRobj
+
+# Display number of unique organisms we find within each clade. ps. 2 kingdom is due to the unassigned
+sapply(fData(MRobj),function(i)length(unique(i)))
+
+# number unassigned
+length(which(fData(MRobj)[,1]=="Unassigned"))
+```
