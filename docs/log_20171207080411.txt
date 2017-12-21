@@ -1,0 +1,76 @@
+Logging started at 08:04:11 on 07 Dec 2017
+QIIME version: 1.9.1
+
+qiime_config values:
+pick_otus_reference_seqs_fp	/anaconda2/envs/qiime1/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/rep_set/97_otus.fasta
+sc_queue	all.q
+pynast_template_alignment_fp	/anaconda2/envs/qiime1/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/rep_set_aligned/85_otus.pynast.fasta
+cluster_jobs_fp	start_parallel_jobs.py
+assign_taxonomy_reference_seqs_fp	/anaconda2/envs/qiime1/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/rep_set/97_otus.fasta
+torque_queue	friendlyq
+jobs_to_start	1
+denoiser_min_per_core	50
+assign_taxonomy_id_to_taxonomy_fp	/anaconda2/envs/qiime1/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt
+temp_dir	/var/folders/8f/y12y4srx5z3gww29gc5kqdwm0000gn/T/
+blastall_fp	blastall
+seconds_to_sleep	1
+
+parameter file values:
+parallel:jobs_to_start	1
+
+Input file md5 sums:
+GSCID_Seqs_4Nauder.fna: 013db75ecc217dec49d203dc2fef477e
+
+Executing commands.
+
+# Pick OTUs command 
+pick_otus.py -i GSCID_Seqs_4Nauder.fna -o ./qiime_output/uclust_picked_otus 
+
+Stdout:
+
+Stderr:
+
+# Pick representative set command 
+pick_rep_set.py -i ./qiime_output/uclust_picked_otus/GSCID_Seqs_4Nauder_otus.txt -f GSCID_Seqs_4Nauder.fna -l ./qiime_output/rep_set//GSCID_Seqs_4Nauder_rep_set.log -o ./qiime_output/rep_set//GSCID_Seqs_4Nauder_rep_set.fasta 
+
+Stdout:
+
+Stderr:
+
+# Assign taxonomy command 
+assign_taxonomy.py -o ./qiime_output/uclust_assigned_taxonomy -i ./qiime_output/rep_set//GSCID_Seqs_4Nauder_rep_set.fasta 
+
+Stdout:
+
+Stderr:
+
+# Make OTU table command 
+make_otu_table.py -i ./qiime_output/uclust_picked_otus/GSCID_Seqs_4Nauder_otus.txt -t ./qiime_output/uclust_assigned_taxonomy/GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt -o ./qiime_output/otu_table.biom 
+
+Stdout:
+
+Stderr:
+
+# Align sequences command 
+align_seqs.py -i ./qiime_output/rep_set//GSCID_Seqs_4Nauder_rep_set.fasta -o ./qiime_output/pynast_aligned_seqs 
+
+Stdout:
+
+Stderr:
+
+# Filter alignment command 
+filter_alignment.py -o ./qiime_output/pynast_aligned_seqs -i ./qiime_output/pynast_aligned_seqs/GSCID_Seqs_4Nauder_rep_set_aligned.fasta 
+
+Stdout:
+
+Stderr:
+
+# Build phylogenetic tree command 
+make_phylogeny.py -i ./qiime_output/pynast_aligned_seqs/GSCID_Seqs_4Nauder_rep_set_aligned_pfiltered.fasta -o ./qiime_output/rep_set.tre 
+
+Stdout:
+
+Stderr:
+
+
+Logging stopped at 10:12:52 on 07 Dec 2017
