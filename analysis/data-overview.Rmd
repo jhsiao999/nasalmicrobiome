@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Data processing steps are as follows:
 
-1. [QIIME for read alignment](data/log_20171207080411.txt)
+1. [QIIME for read alignment](log_20171207080411.txt)
 
 2. [QIIME output to MRexperiment object](step0_build_MRexperiment.html)
 
