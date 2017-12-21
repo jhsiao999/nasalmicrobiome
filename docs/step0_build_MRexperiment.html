@@ -324,11 +324,11 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-12-21</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> d436804</p>
+<p><strong>Code version:</strong> 1c16b39</p>
 <hr />
 <div id="introductionsummary" class="section level2">
 <h2>Introduction/Summary</h2>
-<p>Here we combine QIIME output, OTU taxonomy labels, and sample phenotype labels into a <code>metagenomeSeq</code> <code>MRexperiment</code> object <code>nasal.rds</code>. The sources of data are</p>
+<p>Here we combine QIIME output, OTU taxonomy labels, and sample phenotype labels into a <code>metagenomeSeq</code> <code>MRexperiment</code> object <code>nasal_raw.rds</code>. The sources of data are</p>
 <ul>
 <li><p>QIIME output: <code>otu_table.biom</code></p></li>
 <li><p>Taxonomy labels: <code>GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt</code></p></li>
@@ -408,7 +408,7 @@ pData(counts) = pd</code></pre>
 <div id="saving-the-file" class="section level2">
 <h2>Saving the file</h2>
 <p>Lastly, we save the object as an RDS file.</p>
-<pre class="r"><code>saveRDS(counts, file=&quot;../data/nasal.rds&quot;)</code></pre>
+<pre class="r"><code>saveRDS(counts, file=&quot;../data/nasal_raw.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="sessioninfo" class="section level2">
