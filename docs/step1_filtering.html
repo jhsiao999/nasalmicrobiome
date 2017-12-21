@@ -326,11 +326,11 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-12-21</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 0c0400c</p>
+<p><strong>Code version:</strong> 983d902</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>We excluded samples and OTUs based on the following criteria:</p>
+<p>We imported raw data (<code>nasal_raw.rds</code>) and excluded samples and OTUs based on the following criteria. The filtered data are saved in <code>nasal_filtered.rds</code>.</p>
 <p><em>Prior to filtering, there are 42,999 features and 201 samples</em></p>
 <ol style="list-style-type: decimal">
 <li>Low sequencing depth 1.1. Samples with total count &lt; 1000<br />
@@ -361,7 +361,7 @@ shared across the workflowr files. -->
 </div>
 <div id="loading-data" class="section level2">
 <h2>Loading data</h2>
-<pre class="r"><code>MRobj = readRDS(&quot;../data/nasal.rds&quot;)
+<pre class="r"><code>MRobj = readRDS(&quot;../data/nasal_raw.rds&quot;)
 MRobj</code></pre>
 <pre><code>MRexperiment (storageMode: environment)
 assayData: 42999 features, 201 samples 
@@ -414,16 +414,12 @@ Annotation:  </code></pre>
 <ul>
 <li><p>OTUs present (&gt; 0 read) in 5 or more samples</p></li>
 <li><p>OTUs that are quantified with &gt; 20 reads in at least one sample</p></li>
+<li><p>After filtering, we have 5,521 features and 197 samples.</p></li>
 </ul>
 <pre class="r"><code>nmat = MRcounts(MRobj)
 keep = which( rowSums(nmat&gt;0)&gt;=5 | rowSums(nmat&gt;=20)&gt;0 )
-MRobj=MRobj[keep,]</code></pre>
-<hr />
-</div>
-<div id="unassigned" class="section level2">
-<h2>Unassigned</h2>
-<p>After filtering, we have 5,521 features and 197 samples.</p>
-<pre class="r"><code>MRobj</code></pre>
+MRobj=MRobj[keep,]
+MRobj</code></pre>
 <pre><code>MRexperiment (storageMode: environment)
 assayData: 5521 features, 197 samples 
   element names: counts 
@@ -438,6 +434,10 @@ featureData
   fvarMetadata: labelDescription
 experimentData: use &#39;experimentData(object)&#39;
 Annotation:  </code></pre>
+<hr />
+</div>
+<div id="unassigned" class="section level2">
+<h2>Unassigned</h2>
 <p>Number of unique organisms we find within each clade. PS. 2 at the Kindom level due to the unassigned</p>
 <pre class="r"><code>sapply(fData(MRobj),function(i)length(unique(i)))</code></pre>
 <pre><code>Kingdom  Phylum   Class   Order  Family   Genus Species 
@@ -447,7 +447,7 @@ Annotation:  </code></pre>
 <pre><code>[1] 1098</code></pre>
 <p>Filtering Unassigned.</p>
 <pre class="r"><code>MRobj = MRobj[- which(fData(MRobj)[,1]==&quot;Unassigned&quot;),]
-saveRDS(MRobj,file=&quot;../data/nasal_filtered.rds&quot;)</code></pre>
+#saveRDS(MRobj,file=&quot;../data/nasal_filtered.rds&quot;)</code></pre>
 <p>After filtering, we have 4,423 features and 197 samples.</p>
 <pre class="r"><code>MRobj</code></pre>
 <pre><code>MRexperiment (storageMode: environment)
@@ -468,7 +468,7 @@ Annotation:  </code></pre>
 <div id="excluded-sample" class="section level2">
 <h2>Excluded sample</h2>
 <p>4 samples were excluded from the filtered data: EM0062, E0194, EM0088, EM0053.</p>
-<pre class="r"><code>pre_filtered &lt;- readRDS(&quot;../data/nasal.rds&quot;)
+<pre class="r"><code>pre_filtered &lt;- readRDS(&quot;../data/nasal_raw.rds&quot;)
 post_filtered &lt;- readRDS(&quot;../data/nasal_filtered.rds&quot;)
 
 excluded_samples &lt;- setdiff(colnames(MRcounts(pre_filtered)), colnames(MRcounts(post_filtered)))
