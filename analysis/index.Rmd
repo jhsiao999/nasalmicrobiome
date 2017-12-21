@@ -7,4 +7,18 @@ output:
 
 Share results of nasal microbiome project.
 
+* [Processing reads - from reads to count table](data-overview.html)
+
+
+---
+
+* Data processing
+  * QUIIME for read alignment
+      * [Download analysis log](../data/log_20171207080411.txt)
+  * [Filtering for samples and OTUs](taxonomy-n-filtering.html)
+  
+
+* Shiny site for our exploratory data analysis
+    http://138.197.10.90:3838/shiny/shinyapp/
+
 
