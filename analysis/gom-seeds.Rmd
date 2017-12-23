@@ -1,0 +1,138 @@
+---
+title: "Grades of membership model"
+author: "JNP"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+## Summary
+
+Motivation: when running `CountClut`, sample cluster assignment may differ between different random seeds, despite similar cluster characteristics in feature abundancce. This issue is not unique to `CountClust`. In model-based unsupervised clustering methods, the parameter space is usually complex, and as a result, difficult to find global maximum of the model likelihood. 
+
+Here I run `CountClust` under 100 different random seeds. I compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent `CountClust` analysis. 
+
+Across these 100 random seeds `409` produced the largest BF and is thus chosen as our random seed. 
+
+
+$~$
+
+---
+
+## Package
+
+```{r}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(metagenomeSeq)
+library(CountClust)
+library(parallel)
+```
+
+## Loading data
+
+Read in filtered data.
+
+```{r}
+MRobj = readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
+MRobj
+```
+
+$~$
+
+---
+
+## 100 random seeds
+
+Apply `CountClust` to fit grades of membership model. 
+
+```{r, eval = T}
+counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
+
+# get 100 random seeds
+source("../code/print-prime.R")
+seeds <- prime(543)
+```
+
+```{r, eval = F}
+res <- vector("list", length(seeds))
+
+for (i in 93:100) {
+  set.seed(seeds[i])
+  res[[i]] <- FitGoM(t(counts), K=c(2), tol=1e-6)[[1]]
+}
+
+saveRDS(res, file = "../output/gom_seeds.Rmd/res.rds")
+```
+
+
+```{r, eval = T}
+res <- readRDS(file="../output/gom_seeds.Rmd/res.rds")
+```
+
+Bayes factor differs between the seeds.
+
+```{r}
+summary(do.call(c,lapply(res, "[[", 4)))
+```
+
+Choose the seed with maximum BF: `r seeds[80]`
+
+```{r}
+which.max(lapply(res, "[[", 4))
+```
+
+```{r, eval=F}
+saveRDS(res[[80]], file = "res_best_seed_409.rds")
+```
+
+$~$
+
+## Best seeds
+
+Results using the seed with the highest BF.
+
+```{r, eval=T}
+res_best <- readRDS(file = "res_best_seed_409.rds")
+```
+
+```{r}
+cluster <- apply(res_best$omega, 1, which.max)
+
+table(cluster)
+kable(res_best$omega)
+```
+
+$~$
+
+---
+
+## Session Info
+
+```{r, echo = F}
+sessionInfo()
+```
