@@ -324,7 +324,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-12-23</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 9122d29</p>
+<p><strong>Code version:</strong> 2769e5d</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
@@ -380,8 +380,8 @@ for (i in 93:100) {
   res[[i]] &lt;- FitGoM(t(counts), K=c(2), tol=1e-6)[[1]]
 }
 
-saveRDS(res, file = &quot;../output/gom_seeds.Rmd/res.rds&quot;)</code></pre>
-<pre class="r"><code>res &lt;- readRDS(file=&quot;../output/gom_seeds.Rmd/res.rds&quot;)</code></pre>
+saveRDS(res, file = &quot;../output/gom-seeds.Rmd/res.rds&quot;)</code></pre>
+<pre class="r"><code>res &lt;- readRDS(file=&quot;../output/gom-seeds.Rmd/res.rds&quot;)</code></pre>
 <p>Bayes factor differs between the seeds.</p>
 <pre class="r"><code>summary(do.call(c,lapply(res, &quot;[[&quot;, 4)))</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -389,13 +389,13 @@ saveRDS(res, file = &quot;../output/gom_seeds.Rmd/res.rds&quot;)</code></pre>
 <p>Choose the seed with maximum BF: 409</p>
 <pre class="r"><code>which.max(lapply(res, &quot;[[&quot;, 4))</code></pre>
 <pre><code>[1] 80</code></pre>
-<pre class="r"><code>saveRDS(res[[80]], file = &quot;res_best_seed_409.rds&quot;)</code></pre>
+<pre class="r"><code>saveRDS(res[[80]], file = &quot;../output/gom-seeds.Rmd/res_best_seed_409.rds&quot;)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
 </div>
 <div id="best-seeds" class="section level2">
 <h2>Best seeds</h2>
 <p>Results using the seed with the highest BF.</p>
-<pre class="r"><code>res_best &lt;- readRDS(file = &quot;res_best_seed_409.rds&quot;)</code></pre>
+<pre class="r"><code>res_best &lt;- readRDS(file = &quot;../output/gom-seeds.Rmd/res_best_seed_409.rds&quot;)</code></pre>
 <pre class="r"><code>cluster &lt;- apply(res_best$omega, 1, which.max)
 
 table(cluster)</code></pre>
