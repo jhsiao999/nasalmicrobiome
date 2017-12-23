@@ -86,12 +86,12 @@ for (i in 93:100) {
   res[[i]] <- FitGoM(t(counts), K=c(2), tol=1e-6)[[1]]
 }
 
-saveRDS(res, file = "../output/gom_seeds.Rmd/res.rds")
+saveRDS(res, file = "../output/gom-seeds.Rmd/res.rds")
 ```
 
 
 ```{r, eval = T}
-res <- readRDS(file="../output/gom_seeds.Rmd/res.rds")
+res <- readRDS(file="../output/gom-seeds.Rmd/res.rds")
 ```
 
 Bayes factor differs between the seeds.
@@ -107,7 +107,7 @@ which.max(lapply(res, "[[", 4))
 ```
 
 ```{r, eval=F}
-saveRDS(res[[80]], file = "res_best_seed_409.rds")
+saveRDS(res[[80]], file = "../output/gom-seeds.Rmd/res_best_seed_409.rds")
 ```
 
 $~$
@@ -117,7 +117,7 @@ $~$
 Results using the seed with the highest BF.
 
 ```{r, eval=T}
-res_best <- readRDS(file = "res_best_seed_409.rds")
+res_best <- readRDS(file = "../output/gom-seeds.Rmd/res_best_seed_409.rds")
 ```
 
 ```{r}
