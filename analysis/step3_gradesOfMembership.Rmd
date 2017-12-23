@@ -88,8 +88,8 @@ groupIds = split(seq(rowMaxs),factor(rowMaxs))
 cl = rep("1",sum(sapply(groupIds,length))); cl[groupIds[[2]]] = 2
 
 table(cl)
-# cbind(groupIDs = cl,round(cct,3)) %>% kable %>%
-#   kable_styling()
+cbind(groupIDs = cl,round(cct,3)) %>% kable %>%
+  kable_styling()
 ```
 
 $~$
