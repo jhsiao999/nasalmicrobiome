@@ -33,7 +33,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 
 Load data post filtering, normalization and batch correction (`nasal_filtered_normed_batchcorrected.rds`).
 
-Apply grades of membership model using `CountClust`.
+Apply grades of membership model using `CountClust`. For how we chose the random seed, see our analysis of GoM under different random seeds ().
 
 $~$
 
@@ -67,7 +67,7 @@ $~$
 Apply `CountClust` to fit grades of membership model. 
 
 ```{r, eval = F}
-set.seed(17)
+set.seed(409)
 counts_clust <- FitGoM(t(counts), K=c(2), tol=0.00001)
 #saveRDS(counts_clust, file = "../data/count-clust.rds")
 ```
