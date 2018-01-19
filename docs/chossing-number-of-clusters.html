@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Choosing number of clusters in GoM model</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">nasalmicrobiome</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jhsiao999/nasalmicrobiome">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Choosing number of clusters in GoM model</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
+1.0/zoneinfo/America/Chicago&#39;</code></pre>
+<p><strong>Last updated:</strong> 2018-01-19</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 140d550</p>
+<hr />
+<div id="background-and-summar" class="section level2">
+<h2>Background and summar</h2>
+<p>The GoM (Grades of Membership) model computes log Bayes factor for comparing model fitting with k clusters versus null single cluster model. The log Bayes factor is corrected for the number of parameters fitted in each model. In clustering analysis, one typically chooses k that has the largest Bayes factor. However, it is worth remembering that in practice, it is unlikely to get a true k, and results from different k may complement each other rather than competing with each other.</p>
+<p>In the current analysis, we evaluated the data with k = 2 to 20. We found that k=2 produces the largest Bayes factor.</p>
+<hr />
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<pre class="r"><code>library(knitr)
+library(kableExtra)
+library(dplyr)
+library(metagenomeSeq)
+library(CountClust)</code></pre>
+<p>Read in filtered data.</p>
+<pre class="r"><code>MRobj &lt;- readRDS(&quot;../data/nasal_filtered_normed_batchcorrected.rds&quot;)
+counts &lt;- MRcounts(MRobj,norm=FALSE,log=FALSE)
+
+MRobj</code></pre>
+<pre><code>MRexperiment (storageMode: environment)
+assayData: 616 features, 197 samples 
+  element names: counts 
+protocolData: none
+phenoData
+  sampleNames: EM0042 EM0047 ... E0168 (197 total)
+  varLabels: StudyID age ... infnone (94 total)
+  varMetadata: labelDescription
+featureData
+  featureNames: denovo6 denovo17 ... denovo42992 (4423 total)
+  fvarLabels: Kingdom Phylum ... Species (7 total)
+  fvarMetadata: labelDescription
+experimentData: use &#39;experimentData(object)&#39;
+Annotation:  </code></pre>
+<p>Fitting k=2 to 20.</p>
+<pre class="r"><code>fits &lt;- FitGoM(t(counts), K=c(2:20), tol=0.00001)
+saveRDS(fits, file = &quot;output/chossing-number-of-clusters.Rmd/gomfits.rds&quot;)</code></pre>
+<p>Extract sample memberships.</p>
+<pre class="r"><code>fits &lt;- readRDS(file = &quot;../output/chossing-number-of-clusters.Rmd/gomfits.rds&quot;)
+
+clust_fit_membership &lt;- lapply(fits, function(xx) {
+     apply(xx$omega, 1, which.max)
+  })
+
+for (i in 1:length(clust_fit_membership)) {
+  print(table(clust_fit_membership[[i]]))
+}</code></pre>
+<pre><code>
+  1   2 
+184  13 
+
+  1   2   3 
+181  14   2 
+
+  1   2   3   4 
+113  69   8   7 
+
+ 1  2  3  4  5 
+95 68 22  8  4 
+
+  1   2   3   4   5   6 
+112  69   7   5   3   1 
+
+ 1  2  3  4  5  6  7 
+80 65 37  4  3  5  3 
+
+ 1  2  3  4  5  6  7  8 
+70 55 24 21 13  7  4  3 
+
+ 1  2  3  4  5  6  7  8  9 
+74 30 27 27 14 13  5  5  2 
+
+ 1  2  3  4  5  6  7  8  9 10 
+71 30 28 22 13 12  9  6  4  2 
+
+ 1  2  3  4  5  6  7  8  9 10 
+73 28 24 19 13  9 12  6  7  6 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 
+78 27 24 16 17 13  4  5  5  3  3  2 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 
+79 28 26 18 16 12  6  6  1  2  1  1  1 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 
+76 48 26 13 11  6  3  4  3  2  2  2  1 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 15 
+78 27 25 18 11  9 10  6  3  2  3  2  2  1 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 
+64 25 23 16 15 17  9  6  2  4  5  3  2  3  2  1 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 
+75 25 17 13 15  9  9 10  6  5  2  3  2  2  2  2 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 
+73 24 17 15 13 10  1  9  6  6  5  3  2  4  3  3  2  1 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 
+73 27 27 16 10  4 11  4  5  3  2  3  3  3  2  1  1  1  1 
+
+ 1  2  3  4  5  6  7  8  9 10 11 12 13 15 16 17 18 19 20 
+71 26 25 13 10  7  9  6  4  6  2  3  3  3  1  2  2  2  2 </code></pre>
+<hr />
+</div>
+<div id="log-bayes-facctor" class="section level2">
+<h2>Log Bayes Facctor</h2>
+<pre class="r"><code>par(mfrow=c(1,2))
+plot(bf_species, type = &quot;b&quot;, xlab = &quot;Number of clusters&quot;,
+     ylab = &quot;log Bayes Factor (H1 vs single cluster)&quot;, main = &quot;Species&quot;)
+plot(bf_species_seq, type = &quot;b&quot;, xlab = &quot;Number of clusters&quot;,
+     ylab = &quot;Percent change in log Bayes Factor (k vs k-1)&quot;, main = &quot;Species&quot;)</code></pre>
+<p><img src="figure/chossing-number-of-clusters.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.20.1
+ [4] RColorBrewer_1.1-2   glmnet_2.0-13        foreach_1.4.4       
+ [7] Matrix_1.2-12        limma_3.34.4         Biobase_2.38.0      
+[10] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.6.1    
+[13] knitr_1.17          
+
+loaded via a namespace (and not attached):
+ [1] maptpx_1.9-3       Rcpp_0.12.14       ape_5.0           
+ [4] lattice_0.20-35    gtools_3.5.0       assertthat_0.2.0  
+ [7] rprojroot_1.2      digest_0.6.13      slam_0.1-40       
+[10] R6_2.2.2           plyr_1.8.4         backports_1.1.2   
+[13] stats4_3.4.1       evaluate_0.10.1    httr_1.3.1        
+[16] gplots_3.0.1       rlang_0.1.4        lazyeval_0.2.1    
+[19] gdata_2.18.0       vegan_2.4-5        rmarkdown_1.8     
+[22] readr_1.1.1        stringr_1.2.0      munsell_0.4.3     
+[25] compiler_3.4.1     pkgconfig_2.0.1    SQUAREM_2017.10-1 
+[28] mgcv_1.8-22        htmltools_0.3.6    nnet_7.3-12       
+[31] tibble_1.3.4       codetools_0.2-15   matrixStats_0.52.2
+[34] permute_0.9-4      viridisLite_0.2.0  MASS_7.3-47       
+[37] bitops_1.0-6       grid_3.4.1         nlme_3.1-131      
+[40] gtable_0.2.0       git2r_0.20.0       magrittr_1.5      
+[43] scales_0.5.0       KernSmooth_2.23-15 stringi_1.1.6     
+[46] reshape2_1.4.3     flexmix_2.3-14     bindrcpp_0.2      
+[49] xml2_1.1.1         boot_1.3-20        cowplot_0.9.2     
+[52] iterators_1.0.9    tools_3.4.1        picante_1.6-2     
+[55] glue_1.2.0         hms_0.4.0          yaml_2.1.16       
+[58] colorspace_1.3-2   cluster_2.0.6      caTools_1.17.1    
+[61] rvest_0.3.2        bindr_0.1          modeltools_0.2-21 </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
