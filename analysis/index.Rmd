@@ -10,11 +10,14 @@ Share results of nasal microbiome project.
 * [Processing reads - from reads to count table](data-overview.html)
 
 
-* Analysis
+* Cluster analysis (Applying GoM - Grades of Membership model)
+    * [Choosing number of clusters](chossing-number-of-clusters.html)
     * [GOM cluster memberships under different seeds](gom-seeds.html)
-    
-    * Cluster characteristics
-        * [Stacked bar plot of abundance](stacked_bar_plots.html)
+    * [Grades of membership model](step3_gradesOfMembership.html)
+    * [Variance explained under different k](cluster-variance-explained.html)
+  
+* Cluster characteristics
+    * [Stacked bar plot of abundance](stacked_bar_plots.html)
 
 ---
 
