@@ -24,7 +24,7 @@ knitr::read_chunk("chunks.R")
 ```
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning=F, message =F)
 ```
 
 ---
@@ -38,8 +38,6 @@ Data processing steps are as follows:
 3. [Filtering samples and OTUs](step1_filtering.html)
 
 4. [Normalization and Batch correction](step2_normalization_batch.html)
-
-5. [Grades of membership model](step3_gradesOfMembership.html)
 
 
 ---
