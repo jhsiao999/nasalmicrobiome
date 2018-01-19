@@ -321,28 +321,25 @@ shared across the workflowr files. -->
 <!-- Insert the date the file was last updated -->
 <pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2017-12-23</p>
+<p><strong>Last updated:</strong> 2018-01-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 12a7af0</p>
+<p><strong>Code version:</strong> 15a38e1</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>Load data post filtering, normalization and batch correction (<code>nasal_filtered_normed_batchcorrected.rds</code>).</p>
-<p>Apply grades of membership model using <code>CountClust</code>. For how we chose the random seed, see our analysis of GoM under different random seeds (<a href="https://jhsiao999.github.io/nasalmicrobiome/gom-seeds.html" class="uri">https://jhsiao999.github.io/nasalmicrobiome/gom-seeds.html</a>).</p>
+<p>Apply grades of membership model using <code>CountClust</code>. We chose a random seed based on a series of analysis comparing goodness-of-fit of the model under 100 random seeds (<a href="https://jhsiao999.github.io/nasalmicrobiome/gom-seeds.html" class="uri">https://jhsiao999.github.io/nasalmicrobiome/gom-seeds.html</a>). The best random seed produces the largest Bayes Factor and is used for running the Grades of Membership (GoM) model.</p>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
-<div id="package" class="section level2">
-<h2>Package</h2>
+<div id="loading-data-and-packages" class="section level2">
+<h2>Loading data and packages</h2>
 <pre class="r"><code>library(knitr)
 library(kableExtra)
 library(dplyr)
 library(metagenomeSeq)
 library(CountClust)</code></pre>
-</div>
-<div id="loading-data" class="section level2">
-<h2>Loading data</h2>
 <p>Read in filtered data.</p>
 <pre class="r"><code>MRobj = readRDS(&quot;../data/nasal_filtered_normed_batchcorrected.rds&quot;)
 MRobj</code></pre>
@@ -367,6 +364,8 @@ Annotation:  </code></pre>
 <h2>Clustering</h2>
 <p>Apply <code>CountClust</code> to fit grades of membership model.</p>
 <pre class="r"><code>set.seed(409)
+
+counts &lt;- MRcounts(MRobj,norm=FALSE,log=FALSE)
 counts_clust &lt;- FitGoM(t(counts), K=c(2), tol=0.00001)
 #saveRDS(counts_clust, file = &quot;../data/count-clust.rds&quot;)</code></pre>
 <p>Load previous computed count_clust results.</p>
