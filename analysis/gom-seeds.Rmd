@@ -1,6 +1,6 @@
 ---
-title: "Grades of membership model"
-author: "JNP"
+title: "Grades of membership model: choose random seed"
+author: "Joyce Hsiao"
 output: html_document
 ---
 
@@ -35,7 +35,7 @@ Motivation: when running `CountClut`, sample cluster assignment may differ betwe
 
 Here I run `CountClust` under 100 different random seeds. I compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent `CountClust` analysis. 
 
-Across these 100 random seeds `409` produced the largest BF and is thus chosen as our random seed. 
+Across these 100 random seeds `409` produced the largest BF and is thus chosen as our random seed. This chosen random seed (best seed) is then used in our final results (https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html). 
 
 
 $~$
