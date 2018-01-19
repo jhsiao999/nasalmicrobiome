@@ -1,0 +1,117 @@
+---
+title: "Compute variance explained under different K"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+## Background and summary
+
+We compare fitting under differet k and computed for every feature, sample variance in abundance that is explained by sample cluster membership. 
+
+Results showed that k=2 gives the largest variance explained (median of sample variances is higher than the other k).
+
+---
+
+## Analysis
+
+```{r}
+library(ggplot2)
+library(metagenomeSeq)
+```
+
+Load data
+
+```{r}
+MRobj <- readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
+counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
+```
+
+Load previously computed results.
+
+```{r}
+fits <- readRDS(file = "../output/chossing-number-of-clusters.Rmd/gomfits.rds")
+```
+
+Extract sampel cluster membership.
+
+```{r}
+membership <- lapply(fits, function(xx) {
+     apply(xx$omega, 1, which.max)
+  })
+```
+
+Compute variance explained.
+
+```{r, eval = FALSE}
+varprop_species <- lapply(1:length(membership), function(index) {
+  which_sample <- which(colnames(counts) %in% names(membership[[index]]))
+  counts_which <- counts[, which_sample]
+  var <- sapply(1:nrow(counts_which), function(index2) {
+            res <- lm(log2(counts_which[index2,]+2) ~ membership[[index]])
+            sumOfsquares <- anova(res)[[2]]
+            sumOfsquares[1]/sum(sumOfsquares) })
+  return(var)
+})
+names(varprop_species) <- names(membership)
+saveRDS(varprop_species, file = "../output/cluster-variance-explained.Rmd/varprop.rds")
+```
+
+Plot variance explained
+
+```{r}
+varprop <- readRDS("../output/cluster-variance-explained.Rmd/varprop.rds")
+varprop_long <- data.frame(
+  prop = do.call(c, varprop),
+  cluster = as.factor(rep(2:20, each = length(varprop[[1]]))))
+
+ggplot(varprop_long, aes(x = cluster, y = prop,
+                            col = cluster), size = .2) +
+  geom_violin(trim = FALSE, size=.5) +
+  geom_boxplot(width=0.1, size = .6) +
+  labs(x = "Number of clusters", y = "Proportion variance explained")
+
+varprop_long$cluster <- as.numeric(as.character(varprop_long$cluster))
+ggplot(subset(varprop_long, cluster  < 6), aes(x = as.factor(cluster), y = prop,
+                            col = as.factor(cluster)), size = .2) +
+  geom_violin(trim = FALSE, size=.5) +
+  geom_boxplot(width=0.1, size = .6) +
+  labs(x = "Number of clusters", y = "Proportion variance explained")
+
+for (i in 1:4) {
+  cat(c(2:5)[i], "clusters \n")
+  print(summary(varprop[[i]]))
+}
+```
+
+
+---
+
+## Session information
+
+```{r, echo = F}
+sessionInfo()
+```
+
