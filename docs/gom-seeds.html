@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="JNP" />
+<meta name="author" content="Joyce Hsiao" />
 
 
-<title>Grades of membership model</title>
+<title>Grades of membership model: choose random seed</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -309,8 +309,8 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Grades of membership model</h1>
-<h4 class="author"><em>JNP</em></h4>
+<h1 class="title toc-ignore">Grades of membership model: choose random seed</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
 
 </div>
 
@@ -321,16 +321,16 @@ shared across the workflowr files. -->
 <!-- Insert the date the file was last updated -->
 <pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2017-12-23</p>
+<p><strong>Last updated:</strong> 2018-01-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2769e5d</p>
+<p><strong>Code version:</strong> 7484c45</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>Motivation: when running <code>CountClut</code>, sample cluster assignment may differ between different random seeds, despite similar cluster characteristics in feature abundancce. This issue is not unique to <code>CountClust</code>. In model-based unsupervised clustering methods, the parameter space is usually complex, and as a result, difficult to find global maximum of the model likelihood.</p>
 <p>Here I run <code>CountClust</code> under 100 different random seeds. I compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent <code>CountClust</code> analysis.</p>
-<p>Across these 100 random seeds <code>409</code> produced the largest BF and is thus chosen as our random seed.</p>
+<p>Across these 100 random seeds <code>409</code> produced the largest BF and is thus chosen as our random seed. This chosen random seed (best seed) is then used in our final results (<a href="https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html" class="uri">https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html</a>).</p>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
