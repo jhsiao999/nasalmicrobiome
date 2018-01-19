@@ -31,15 +31,15 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 
 ## Summary
 
-Load data post filtering, normalization and batch correction (`nasal_filtered_normed_batchcorrected.rds`).
+Load data post filtering, normalization and batch correction (`nasal_filtered_normed_batchcorrected.rds`). 
 
-Apply grades of membership model using `CountClust`. For how we chose the random seed, see our analysis of GoM under different random seeds (https://jhsiao999.github.io/nasalmicrobiome/gom-seeds.html).
+Apply grades of membership model using `CountClust`. We chose a random seed based on a series of analysis comparing goodness-of-fit of the model under 100 random seeds (https://jhsiao999.github.io/nasalmicrobiome/gom-seeds.html). The best random seed produces the largest Bayes Factor and is used for running the Grades of Membership (GoM) model. 
 
 $~$
 
 ---
 
-## Package
+## Loading data and packages
 
 ```{r}
 library(knitr)
@@ -48,8 +48,6 @@ library(dplyr)
 library(metagenomeSeq)
 library(CountClust)
 ```
-
-## Loading data
 
 Read in filtered data.
 
@@ -68,6 +66,8 @@ Apply `CountClust` to fit grades of membership model.
 
 ```{r, eval = F}
 set.seed(409)
+
+counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
 counts_clust <- FitGoM(t(counts), K=c(2), tol=0.00001)
 #saveRDS(counts_clust, file = "../data/count-clust.rds")
 ```
