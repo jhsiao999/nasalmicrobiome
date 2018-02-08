@@ -1,5 +1,5 @@
 ---
-title: "Grades of membership model"
+title: "Differential abundance analysis"
 author: "JNP"
 output: html_document
 ---

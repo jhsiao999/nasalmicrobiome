@@ -52,7 +52,7 @@ counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
 Load previously computed results.
 
 ```{r}
-fits <- readRDS(file = "../output/chossing-number-of-clusters.Rmd/gomfits.rds")
+fits <- readRDS(file = "../data/gomfits.rds")
 ```
 
 Extract sampel cluster membership.
@@ -76,16 +76,16 @@ varprop_species <- lapply(1:length(membership), function(index) {
   return(var)
 })
 names(varprop_species) <- names(membership)
-saveRDS(varprop_species, file = "../output/cluster-variance-explained.Rmd/varprop.rds")
+saveRDS(varprop_species, file = "../data/varprop.rds")
 ```
 
 Plot variance explained
 
 ```{r}
-varprop <- readRDS("../output/cluster-variance-explained.Rmd/varprop.rds")
+varprop <- readRDS("../data/varprop.rds")
 varprop_long <- data.frame(
   prop = do.call(c, varprop),
-  cluster = as.factor(rep(2:20, each = length(varprop[[1]]))))
+  cluster = as.factor(rep(2:10, each = length(varprop[[1]]))))
 
 ggplot(varprop_long, aes(x = cluster, y = prop,
                             col = cluster), size = .2) +

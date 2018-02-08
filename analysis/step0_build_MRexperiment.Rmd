@@ -78,7 +78,7 @@ dim(counts)
 
 Read in the QIIME taxonomy and attach to the `MRexperiment` object. It requires a bit of cleanup due to the file structure.
 
-```{r}
+```{r fd}
 fd = read.csv("../data/GSCID_Seqs_4Nauder_rep_set_tax_assignments.txt",sep=";",
               stringsAsFactors=FALSE,header=FALSE)
 species = sapply(strsplit(fd[,7],"\t"),function(i)i[1]) %>% ifelse(is.na(.),yes=" s__",no=.)
@@ -107,6 +107,12 @@ for(i in rev(seq(fd)[-1])){
 }
 for(i in seq(fd)) fd[grep("Unassigned",fd[,i]),i] = "Unassigned"
 fd = fd[match(rownames(counts),rownames(fd)),]
+for(i in 2:ncol(fd)){
+  fd[,i] = gsub("\t0.67\t3","",fd[,i])
+  fd[,i] = gsub("\t0.67\t2","",fd[,i])
+  fd[,i] = gsub("\t1.00\t3","",fd[,i])
+  fd[,i] = gsub("\t1.00\t2","",fd[,i])
+}
 fData(counts) = fd
 ```
 
@@ -118,7 +124,7 @@ $~$
 
 Next we read in the metadata (sample phenotype labels) and attach to the `MRexperiment` object
 
-```{r}
+```{r pd}
 pd = read.csv("../data/metadata.tsv",sep = "\t",stringsAsFactors=FALSE)
 rownames(pd) = pd[,1]
 pd = pd[match(colnames(counts),rownames(pd)),]

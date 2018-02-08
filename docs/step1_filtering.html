@@ -321,12 +321,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
-1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2017-12-21</p>
+<p><strong>Last updated:</strong> 2018-02-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 983d902</p>
+<p><strong>Code version:</strong> a0c42a1</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
@@ -441,13 +439,13 @@ Annotation:  </code></pre>
 <p>Number of unique organisms we find within each clade. PS. 2 at the Kindom level due to the unassigned</p>
 <pre class="r"><code>sapply(fData(MRobj),function(i)length(unique(i)))</code></pre>
 <pre><code>Kingdom  Phylum   Class   Order  Family   Genus Species 
-      2      34      79     153     300     544     617 </code></pre>
+      2      31      75     144     259     478     554 </code></pre>
 <p>Number of features unassigned at the Kindom level. (1,098 out of total 5521 OTUs)</p>
 <pre class="r"><code>length(which(fData(MRobj)[,1]==&quot;Unassigned&quot;))</code></pre>
 <pre><code>[1] 1098</code></pre>
 <p>Filtering Unassigned.</p>
 <pre class="r"><code>MRobj = MRobj[- which(fData(MRobj)[,1]==&quot;Unassigned&quot;),]
-#saveRDS(MRobj,file=&quot;../data/nasal_filtered.rds&quot;)</code></pre>
+saveRDS(MRobj,file=&quot;../data/nasal_filtered.rds&quot;)</code></pre>
 <p>After filtering, we have 4,423 features and 197 samples.</p>
 <pre class="r"><code>MRobj</code></pre>
 <pre><code>MRexperiment (storageMode: environment)
@@ -623,7 +621,7 @@ EM0053        0         0         1       0</code></pre>
 <h2>Session Information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
 Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS High Sierra 10.13
+Running under: macOS Sierra 10.12.6
 
 Matrix products: default
 BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
@@ -637,20 +635,20 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] metagenomeSeq_1.20.1 RColorBrewer_1.1-2   glmnet_2.0-13       
-[4] foreach_1.4.4        Matrix_1.2-12        limma_3.34.4        
-[7] Biobase_2.38.0       BiocGenerics_0.24.0 
+[1] metagenomeSeq_1.18.0 RColorBrewer_1.1-2   glmnet_2.0-13       
+[4] foreach_1.4.3        Matrix_1.2-11        limma_3.32.10       
+[7] Biobase_2.36.2       BiocGenerics_0.22.1 
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.14       knitr_1.17         magrittr_1.5      
  [4] lattice_0.20-35    stringr_1.2.0      caTools_1.17.1    
  [7] tools_3.4.1        grid_3.4.1         KernSmooth_2.23-15
-[10] git2r_0.20.0       gtools_3.5.0       htmltools_0.3.6   
-[13] iterators_1.0.9    matrixStats_0.52.2 yaml_2.1.16       
-[16] rprojroot_1.2      digest_0.6.13      bitops_1.0-6      
+[10] git2r_0.21.0       gtools_3.5.0       htmltools_0.3.6   
+[13] iterators_1.0.8    matrixStats_0.52.2 yaml_2.1.15       
+[16] rprojroot_1.2      digest_0.6.14      bitops_1.0-6      
 [19] codetools_0.2-15   evaluate_0.10.1    rmarkdown_1.8     
-[22] gdata_2.18.0       stringi_1.1.6      compiler_3.4.1    
-[25] gplots_3.0.1       backports_1.1.2   </code></pre>
+[22] gdata_2.18.0       stringi_1.1.5      compiler_3.4.1    
+[25] gplots_3.0.1       backports_1.1.1   </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

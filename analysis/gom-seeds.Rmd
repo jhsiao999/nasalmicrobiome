@@ -81,17 +81,17 @@ seeds <- prime(543)
 ```{r, eval = F}
 res <- vector("list", length(seeds))
 
-for (i in 93:100) {
+for (i in 1:100) {
   set.seed(seeds[i])
   res[[i]] <- FitGoM(t(counts), K=c(2), tol=1e-6)[[1]]
 }
 
-saveRDS(res, file = "../output/gom-seeds.Rmd/res.rds")
+saveRDS(res, file = "../data/res.rds")
 ```
 
 
 ```{r, eval = T}
-res <- readRDS(file="../output/gom-seeds.Rmd/res.rds")
+res <- readRDS(file="../data/res.rds")
 ```
 
 Bayes factor differs between the seeds.

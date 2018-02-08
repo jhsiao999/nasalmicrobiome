@@ -56,17 +56,17 @@ counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
 MRobj
 ```
 
-Fitting k=2 to 20.
+Fitting k=2 to 10.
 
 ```{r, eval = F}
-fits <- FitGoM(t(counts), K=c(2:20), tol=0.00001)
-saveRDS(fits, file = "output/chossing-number-of-clusters.Rmd/gomfits.rds")
+fits <- FitGoM(t(counts), K=c(2:10), tol=0.00001)
+saveRDS(fits, file = "../data/gomfits.rds")
 ```
 
 Extract sample memberships.
 
 ```{r}
-fits <- readRDS(file = "../output/chossing-number-of-clusters.Rmd/gomfits.rds")
+fits <- readRDS(file = "../data/gomfits.rds")
 
 clust_fit_membership <- lapply(fits, function(xx) {
      apply(xx$omega, 1, which.max)
@@ -83,7 +83,7 @@ for (i in 1:length(clust_fit_membership)) {
 
 ```{r, echo = FALSE}
 bf_species <- do.call(rbind, lapply(1:length(fits), function(i) {
-  data.frame(no_cluster = c(2:20)[i], BF = fits[[i]]$BF)
+  data.frame(no_cluster = c(2:10)[i], BF = fits[[i]]$BF)
 }) )
 
 bf_species_seq <- 

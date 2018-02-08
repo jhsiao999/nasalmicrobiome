@@ -37,7 +37,7 @@ We preprocessed the data to remove technical biases due to PCR amplification and
 
 2. Batch correction: fit a linear model to each OTU at the speciees level, then estimate and remove batch effect due to sequencin run for each OTU. 
 
-*After aggregating reads at the species levek, we are left with 616 features in 197 samples.*
+*After aggregating reads at the species level, we are left with 553 features in 197 samples.*
 
 $~$
 

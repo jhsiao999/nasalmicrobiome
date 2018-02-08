@@ -137,7 +137,7 @@ Filtering Unassigned.
 
 ```{r}
 MRobj = MRobj[- which(fData(MRobj)[,1]=="Unassigned"),]
-#saveRDS(MRobj,file="../data/nasal_filtered.rds")
+saveRDS(MRobj,file="../data/nasal_filtered.rds")
 ```
 
 After filtering, we have 4,423 features and 197 samples. 
