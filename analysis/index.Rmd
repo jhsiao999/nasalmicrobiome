@@ -21,6 +21,7 @@ Share results of nasal microbiome project.
 
 * Differential abudance analysis
     * [Compare two clusters](differential_abundance.html)
+
 ---
 
 * Shiny site for our exploratory data analysis
