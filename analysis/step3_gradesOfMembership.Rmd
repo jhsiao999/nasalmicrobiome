@@ -65,11 +65,11 @@ $~$
 Apply `CountClust` to fit grades of membership model. 
 
 ```{r, eval = F}
-set.seed(409)
+set.seed(67)
 
 counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
 counts_clust <- FitGoM(t(counts), K=c(2), tol=0.00001)
-#saveRDS(counts_clust, file = "../data/count-clust.rds")
+saveRDS(counts_clust, file = "../data/count-clust.rds")
 ```
 
 Load previous computed count_clust results.

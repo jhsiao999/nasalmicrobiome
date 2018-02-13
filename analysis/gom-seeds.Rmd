@@ -100,14 +100,14 @@ Bayes factor differs between the seeds.
 summary(do.call(c,lapply(res, "[[", 4)))
 ```
 
-Choose the seed with maximum BF: `r seeds[80]`
+Choose the seed with maximum BF: `r seeds[19]`
 
 ```{r}
 which.max(lapply(res, "[[", 4))
 ```
 
 ```{r, eval=F}
-saveRDS(res[[80]], file = "../output/gom-seeds.Rmd/res_best_seed_409.rds")
+saveRDS(res[[19]], file = "../output/gom-seeds.Rmd/res_best_seed_67.rds")
 ```
 
 $~$
@@ -117,7 +117,7 @@ $~$
 Results using the seed with the highest BF.
 
 ```{r, eval=T}
-res_best <- readRDS(file = "../output/gom-seeds.Rmd/res_best_seed_409.rds")
+res_best <- readRDS(file = "../output/gom-seeds.Rmd/res_best_seed_67.rds")
 ```
 
 ```{r}
