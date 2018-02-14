@@ -321,10 +321,10 @@ shared across the workflowr files. -->
 <!-- Insert the date the file was last updated -->
 <pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-02-13</p>
+<p><strong>Last updated:</strong> 2018-02-14</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 4a7eebd</p>
+<p><strong>Code version:</strong> 5b4420c</p>
 <div id="background-and-summary" class="section level2">
 <h2>Background and summary</h2>
 <p>We compare fitting under differet k and computed for every feature, sample variance in abundance that is explained by sample cluster membership.</p>
@@ -380,17 +380,17 @@ ggplot(subset(varprop_long, cluster  &lt; 6), aes(x = as.factor(cluster), y = pr
   print(summary(varprop[[i]]))
 }</code></pre>
 <pre><code>2 clusters 
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-4.600e-07 5.298e-03 2.870e-02 4.776e-02 7.477e-02 2.203e-01 
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.000000 0.002148 0.030757 0.072763 0.116721 0.423194 
 3 clusters 
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-0.0000003 0.0021057 0.0241792 0.0646179 0.0935205 0.3174896 
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.000000 0.004186 0.022204 0.049274 0.068501 0.291761 
 4 clusters 
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-0.00000 0.00277 0.01581 0.02896 0.04426 0.15640 
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+4.800e-07 4.451e-03 2.434e-02 3.920e-02 6.128e-02 2.288e-01 
 5 clusters 
      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-1.000e-08 2.734e-03 1.576e-02 3.911e-02 6.163e-02 2.263e-01 </code></pre>
+5.000e-08 3.904e-03 1.960e-02 4.300e-02 6.926e-02 2.031e-01 </code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
