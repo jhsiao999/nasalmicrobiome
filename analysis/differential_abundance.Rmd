@@ -58,7 +58,7 @@ $~$
 cl = pData(MRobj)$GOM
 mod = model.matrix(~cl)
 fit = fitFeatureModel(MRobj,mod)
-MRfulltable(fit,number = nrow(MRobj),file="~/Desktop/tbl.tsv")
+MRfulltable(fit,number = nrow(MRobj),file="../data/tbl.tsv")
 ```
 
 
