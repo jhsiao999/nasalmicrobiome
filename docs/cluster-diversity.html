@@ -9,10 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Joyce Hsiao" />
+<meta name="author" content="JNP" />
 
 
-<title>Choosing number of clusters in GoM model</title>
+<title>Stacked bar plots</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -309,8 +309,8 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Choosing number of clusters in GoM model</h1>
-<h4 class="author"><em>Joyce Hsiao</em></h4>
+<h1 class="title toc-ignore">Stacked bar plots</h1>
+<h4 class="author"><em>JNP</em></h4>
 
 </div>
 
@@ -326,24 +326,20 @@ shared across the workflowr files. -->
  package git2r is installed -->
 <p><strong>Code version:</strong> 131b5a9</p>
 <hr />
-<div id="background-and-summar" class="section level2">
-<h2>Background and summar</h2>
-<p>The GoM (Grades of Membership) model computes log Bayes factor for comparing model fitting with k clusters versus null single cluster model. The log Bayes factor is corrected for the number of parameters fitted in each model. In clustering analysis, one typically chooses k that has the largest Bayes factor. However, it is worth remembering that in practice, it is unlikely to get a true k, and results from different k may complement each other rather than competing with each other.</p>
-<p>In the current analysis, we evaluated the data with k = 2 to 20. We found that k=2 produces the largest Bayes factor.</p>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<pre class="r"><code>library(dplyr)
+library(metagenomeSeq)
+library(ggplot2)
+library(vegan)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
-<div id="analysis" class="section level2">
-<h2>Analysis</h2>
-<pre class="r"><code>library(knitr)
-library(kableExtra)
-library(dplyr)
-library(metagenomeSeq)
-library(CountClust)
-library(vegan)</code></pre>
-<p>Read in filtered data.</p>
-<pre class="r"><code>MRobj &lt;- readRDS(&quot;../data/nasal_filtered_normed_batchcorrected.rds&quot;)
-counts &lt;- MRcounts(MRobj,norm=FALSE,log=FALSE)
-
+<div id="data" class="section level2">
+<h2>Data</h2>
+<pre class="r"><code>load(&quot;../data/nasal_GOM.rdata&quot;)
 MRobj</code></pre>
 <pre><code>MRexperiment (storageMode: environment)
 assayData: 553 features, 197 samples 
@@ -351,7 +347,7 @@ assayData: 553 features, 197 samples
 protocolData: none
 phenoData
   sampleNames: EM0042 EM0047 ... E0168 (197 total)
-  varLabels: StudyID age ... infnone (94 total)
+  varLabels: StudyID age ... GOM (95 total)
   varMetadata: labelDescription
 featureData
   featureNames: denovo6 denovo17 ... denovo42992 (4423 total)
@@ -359,68 +355,19 @@ featureData
   fvarMetadata: labelDescription
 experimentData: use &#39;experimentData(object)&#39;
 Annotation:  </code></pre>
-<p>Fitting k=2 to 10.</p>
-<pre class="r"><code>fits &lt;- FitGoM(t(counts), K=c(2:10), tol=0.00001)
-saveRDS(fits, file = &quot;../data/gomfits.rds&quot;)</code></pre>
-<p>Extract sample memberships.</p>
-<pre class="r"><code>fits &lt;- readRDS(file = &quot;../data/gomfits.rds&quot;)
-
-clust_fit_membership &lt;- lapply(fits, function(xx) {
-     apply(xx$omega, 1, which.max)
-  })
-
-for (i in 1:length(clust_fit_membership)) {
-  print(table(clust_fit_membership[[i]]))
-}</code></pre>
-<pre><code>
-  1   2 
-180  17 
-
-  1   2   3 
-166  24   7 
-
- 1  2  3  4 
-88 71 27 11 
-
-  1   2   3   4   5 
-105  68  15   8   1 
-
- 1  2  3  4  5  6 
-73 54 40 17 12  1 
-
- 1  2  3  4  5  6  7 
-75 42 38 29  7  3  3 
-
- 1  2  3  4  5  6  7  8 
-79 48 26 19 12  9  2  2 
-
- 1  2  3  4  5  6  7  8  9 
-76 50 25 19 12  9  2  3  1 
-
- 1  2  3  4  5  6  7  8  9 10 
-79 30 27 16 18 11  7  2  5  2 </code></pre>
+<p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
-<div id="log-bayes-facctor" class="section level2">
-<h2>Log Bayes Facctor</h2>
-<pre class="r"><code>par(mfrow=c(1,2))
-plot(bf_species, type = &quot;b&quot;, xlab = &quot;Number of clusters&quot;,
-     ylab = &quot;log Bayes Factor (H1 vs single cluster)&quot;, main = &quot;Species&quot;)
-plot(bf_species_seq, type = &quot;b&quot;, xlab = &quot;Number of clusters&quot;,
-     ylab = &quot;Percent change in log Bayes Factor (k vs k-1)&quot;, main = &quot;Species&quot;)</code></pre>
-<p><img src="figure/chossing-number-of-clusters.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
-<hr />
-</div>
-<div id="diversity" class="section level2">
-<h2>Diversity</h2>
-<pre class="r"><code>for (i in 1:length(clust_fit_membership)) {
-  cl &lt;- factor(clust_fit_membership[[i]])
-  mat &lt;- t(MRcounts(MRobj,norm=FALSE,log=FALSE))
-  H &lt;- diversity(mat,index=&quot;shannon&quot;)
-  boxplot(H~cl, ylab=paste(&quot;shanno&quot;,&quot;diversity index&quot;), col=1:length(levels(cl)),
-          main = names(clust_fit_membership)[i])
-}</code></pre>
-<p><img src="figure/chossing-number-of-clusters.Rmd/diversity-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/chossing-number-of-clusters.Rmd/diversity-9.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<p>Diversity of sample clustering membership based on the best seed.</p>
+<pre class="r"><code>cols &lt;- RColorBrewer::brewer.pal(12, &quot;Set3&quot;)
+cl &lt;- factor(pData(MRobj)$GOM)
+mat &lt;- t(MRcounts(MRobj,norm=FALSE,log=FALSE))
+H &lt;- vegan::diversity(mat,index=&quot;shannon&quot;)
+boxplot(H~cl, ylab=paste(&quot;shanno&quot;,&quot;diversity index&quot;),
+        col = cols[1:length(levels(cl))])</code></pre>
+<p><img src="figure/cluster-diversity.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -442,33 +389,27 @@ attached base packages:
 
 other attached packages:
  [1] vegan_2.4-5          lattice_0.20-35      permute_0.9-4       
- [4] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.20.1
- [7] RColorBrewer_1.1-2   glmnet_2.0-13        foreach_1.4.4       
-[10] Matrix_1.2-12        limma_3.34.4         Biobase_2.38.0      
-[13] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.6.1    
-[16] knitr_1.17          
+ [4] ggplot2_2.2.1        metagenomeSeq_1.20.1 RColorBrewer_1.1-2  
+ [7] glmnet_2.0-13        foreach_1.4.4        Matrix_1.2-12       
+[10] limma_3.34.4         Biobase_2.38.0       BiocGenerics_0.24.0 
+[13] dplyr_0.7.4         
 
 loaded via a namespace (and not attached):
- [1] maptpx_1.9-3       Rcpp_0.12.14       ape_5.0           
- [4] gtools_3.5.0       assertthat_0.2.0   rprojroot_1.2     
- [7] digest_0.6.13      slam_0.1-40        R6_2.2.2          
-[10] plyr_1.8.4         backports_1.1.2    stats4_3.4.1      
-[13] evaluate_0.10.1    httr_1.3.1         gplots_3.0.1      
-[16] rlang_0.1.4        lazyeval_0.2.1     gdata_2.18.0      
-[19] rmarkdown_1.8      readr_1.1.1        stringr_1.2.0     
-[22] munsell_0.4.3      compiler_3.4.1     pkgconfig_2.0.1   
-[25] SQUAREM_2017.10-1  mgcv_1.8-22        htmltools_0.3.6   
-[28] nnet_7.3-12        tibble_1.3.4       codetools_0.2-15  
-[31] matrixStats_0.52.2 viridisLite_0.2.0  MASS_7.3-47       
-[34] bitops_1.0-6       grid_3.4.1         nlme_3.1-131      
-[37] gtable_0.2.0       git2r_0.20.0       magrittr_1.5      
-[40] scales_0.5.0       KernSmooth_2.23-15 stringi_1.1.6     
-[43] reshape2_1.4.3     flexmix_2.3-14     bindrcpp_0.2      
-[46] xml2_1.1.1         boot_1.3-20        cowplot_0.9.2     
-[49] iterators_1.0.9    tools_3.4.1        picante_1.6-2     
-[52] glue_1.2.0         hms_0.4.0          yaml_2.1.16       
-[55] colorspace_1.3-2   cluster_2.0.6      caTools_1.17.1    
-[58] rvest_0.3.2        bindr_0.1          modeltools_0.2-21 </code></pre>
+ [1] Rcpp_0.12.14       plyr_1.8.4         compiler_3.4.1    
+ [4] git2r_0.20.0       bindr_0.1          bitops_1.0-6      
+ [7] iterators_1.0.9    tools_3.4.1        digest_0.6.13     
+[10] nlme_3.1-131       gtable_0.2.0       evaluate_0.10.1   
+[13] tibble_1.3.4       mgcv_1.8-22        pkgconfig_2.0.1   
+[16] rlang_0.1.4        yaml_2.1.16        bindrcpp_0.2      
+[19] cluster_2.0.6      stringr_1.2.0      knitr_1.17        
+[22] gtools_3.5.0       caTools_1.17.1     rprojroot_1.2     
+[25] grid_3.4.1         glue_1.2.0         R6_2.2.2          
+[28] rmarkdown_1.8      gdata_2.18.0       magrittr_1.5      
+[31] MASS_7.3-47        scales_0.5.0       backports_1.1.2   
+[34] gplots_3.0.1       codetools_0.2-15   htmltools_0.3.6   
+[37] matrixStats_0.52.2 assertthat_0.2.0   colorspace_1.3-2  
+[40] KernSmooth_2.23-15 stringi_1.1.6      lazyeval_0.2.1    
+[43] munsell_0.4.3     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
