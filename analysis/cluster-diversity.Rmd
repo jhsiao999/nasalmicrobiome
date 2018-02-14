@@ -1,0 +1,82 @@
+---
+title: "Stacked bar plots"
+author: "JNP"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+$~$
+
+---
+
+## Packages
+
+```{r}
+library(dplyr)
+library(metagenomeSeq)
+library(ggplot2)
+library(vegan)
+```
+
+$~$
+
+---
+
+## Data
+
+```{r}
+load("../data/nasal_GOM.rdata")
+MRobj
+```
+
+$~$
+
+---
+
+## Analysis
+
+Diversity of sample clustering membership based on the best seed. 
+
+
+```{r}
+cols <- RColorBrewer::brewer.pal(12, "Set3")
+cl <- factor(pData(MRobj)$GOM)
+mat <- t(MRcounts(MRobj,norm=FALSE,log=FALSE))
+H <- vegan::diversity(mat,index="shannon")
+boxplot(H~cl, ylab=paste("shanno","diversity index"),
+        col = cols[1:length(levels(cl))])
+```
+
+
+---
+
+## Session information
+
+```{r, echo = F}
+sessionInfo()
+```
+

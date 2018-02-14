@@ -45,6 +45,7 @@ library(kableExtra)
 library(dplyr)
 library(metagenomeSeq)
 library(CountClust)
+library(vegan)
 ```
 
 Read in filtered data.
@@ -100,6 +101,20 @@ plot(bf_species_seq, type = "b", xlab = "Number of clusters",
      ylab = "Percent change in log Bayes Factor (k vs k-1)", main = "Species")
 ```
 
+---
+
+## Diversity
+
+
+```{r diversity}
+for (i in 1:length(clust_fit_membership)) {
+  cl <- factor(clust_fit_membership[[i]])
+  mat <- t(MRcounts(MRobj,norm=FALSE,log=FALSE))
+  H <- diversity(mat,index="shannon")
+  boxplot(H~cl, ylab=paste("shanno","diversity index"), col=1:length(levels(cl)),
+          main = names(clust_fit_membership)[i])
+}
+```
 
 
 ---
