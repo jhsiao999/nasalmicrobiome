@@ -1,7 +1,10 @@
 ---
 title: "Data overview"
 author: "Joyce Hsiao"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
 ---
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
@@ -39,6 +42,8 @@ Data processing steps are as follows:
 
 4. [Normalization and Batch correction](step2_normalization_batch.html)
 
+
+The output data are stored in `data/` folder. `nasal_GOM.rdata` contains `MRobj` and `MRobj2`. Both store counts that have been normalized and batch-corrected. `MRobj2` contains species-level information, while `MRobj` contains information at genus.
 
 ---
 
