@@ -20,9 +20,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -168,101 +165,6 @@ $(document).ready(function () {
 
 
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -314,17 +216,22 @@ div.section {
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
+<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2018c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-02-14</p>
+<p><strong>Last updated:</strong> 2018-04-22</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 5b4420c</p>
+<p><strong>Code version:</strong> 5a2c48c</p>
 <hr />
 <p>Data processing steps are as follows:</p>
 <ol style="list-style-type: decimal">
@@ -333,6 +240,7 @@ shared across the workflowr files. -->
 <li><p><a href="step1_filtering.html">Filtering samples and OTUs</a></p></li>
 <li><p><a href="step2_normalization_batch.html">Normalization and Batch correction</a></p></li>
 </ol>
+<p>The output data are stored in <code>data/</code> folder. <code>nasal_GOM.rdata</code> contains <code>MRobj</code> and <code>MRobj2</code>. Both store counts that have been normalized and batch-corrected. <code>MRobj2</code> contains species-level information, while <code>MRobj</code> contains information at genus.</p>
 <hr />
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -351,10 +259,10 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 loaded via a namespace (and not attached):
- [1] compiler_3.4.1  backports_1.1.2 magrittr_1.5    rprojroot_1.2  
- [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.16     Rcpp_0.12.14   
- [9] stringi_1.1.6   rmarkdown_1.8   knitr_1.17      git2r_0.20.0   
-[13] stringr_1.2.0   digest_0.6.13   evaluate_0.10.1</code></pre>
+ [1] compiler_3.4.1  backports_1.1.2 magrittr_1.5    rprojroot_1.3-2
+ [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.18     Rcpp_0.12.15   
+ [9] stringi_1.1.6   rmarkdown_1.9   knitr_1.20      git2r_0.21.0   
+[13] stringr_1.3.0   digest_0.6.15   evaluate_0.10.1</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -395,8 +303,6 @@ footer is added to webpages before the MathJax javascript. -->
 -->
 
 
-</div>
-</div>
 
 </div>
 
