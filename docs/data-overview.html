@@ -231,7 +231,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2018-04-22</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 5a2c48c</p>
+<p><strong>Code version:</strong> cefceef</p>
 <hr />
 <p>Data processing steps are as follows:</p>
 <ol style="list-style-type: decimal">
@@ -240,7 +240,13 @@ shared across the workflowr files. -->
 <li><p><a href="step1_filtering.html">Filtering samples and OTUs</a></p></li>
 <li><p><a href="step2_normalization_batch.html">Normalization and Batch correction</a></p></li>
 </ol>
-<p>The output data are stored in <code>data/</code> folder. <code>nasal_GOM.rdata</code> contains <code>MRobj</code> and <code>MRobj2</code>. Both store counts that have been normalized and batch-corrected. <code>MRobj2</code> contains species-level information, while <code>MRobj</code> contains information at genus.</p>
+<p>Data ouptut at each step are stored in <code>data/</code> folder</p>
+<ul>
+<li><p><code>nasal_raw.rds</code>: output from <a href="step0_build_MRexperiment.html">Build MRexperiment object</a>.</p></li>
+<li><p><code>nasal_filtered</code>: output from <a href="step1_filtering.html">Filtering samples and OTUs</a>.</p></li>
+<li><p><code>nasal_normalized_batchcorrected.rdata</code>: output from <a href="step2_normalization_batch.html">Normalization and Batch correction</a>.</p></li>
+<li><p><code>nasal_GOM.rds</code>: output from <a href="step3_gradesOfMembership.html">Grades of membership model finalized</a>. Contains sample cluster information.</p></li>
+</ul>
 <hr />
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
