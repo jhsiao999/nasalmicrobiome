@@ -319,12 +319,12 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
+<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2018c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-02-14</p>
+<p><strong>Last updated:</strong> 2018-04-22</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 61026e5</p>
+<p><strong>Code version:</strong> 863632d</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
@@ -352,7 +352,10 @@ phenoData
   varLabels: StudyID age ... infnone (94 total)
   varMetadata: labelDescription
 featureData
-  featureNames: denovo6 denovo17 ... denovo42992 (4423 total)
+  featureNames:
+    k__Bacteria;p__[Thermi];c__Deinococci;o__Deinococcales;f__Deinococcaceae;g__CM44;s__
+    k__Bacteria;p__[Thermi];c__Deinococci;o__Deinococcales;f__Deinococcaceae;g__Deinococcus;s__
+    ... s__zeae (553 total)
   fvarLabels: Kingdom Phylum ... Species (7 total)
   fvarMetadata: labelDescription
 experimentData: use &#39;experimentData(object)&#39;
@@ -1587,13 +1590,13 @@ table(cl)</code></pre>
 <div id="preserve-data-with-gom" class="section level2">
 <h2>Preserve data with GOM</h2>
 <p>Next we save the dataset with the sample clustering labels</p>
-<pre class="r"><code>MRobj2 = MRobj
-assayData(MRobj2)[[&quot;counts&quot;]] = counts
-featureData(MRobj2) = AnnotatedDataFrame(data.frame(Species=rownames(counts)))
+<pre class="r"><code># MRobj2 = MRobj
+# assayData(MRobj2)[[&quot;counts&quot;]] = counts
+# featureData(MRobj2) = AnnotatedDataFrame(data.frame(Species=rownames(counts)))
 pData(MRobj)$GOM = cl
-pData(MRobj2)$GOM = cl
+#pData(MRobj2)$GOM = cl
 
-save(MRobj2, MRobj, file=&quot;../data/nasal_GOM.rdata&quot;)</code></pre>
+saveRDS(MRobj, file=&quot;../data/nasal_GOM.rds&quot;)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
@@ -1617,33 +1620,33 @@ attached base packages:
 other attached packages:
  [1] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.20.1
  [4] RColorBrewer_1.1-2   glmnet_2.0-13        foreach_1.4.4       
- [7] Matrix_1.2-12        limma_3.34.4         Biobase_2.38.0      
-[10] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.6.1    
-[13] knitr_1.17          
+ [7] Matrix_1.2-12        limma_3.34.9         Biobase_2.38.0      
+[10] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.7.0    
+[13] knitr_1.20          
 
 loaded via a namespace (and not attached):
- [1] maptpx_1.9-3       Rcpp_0.12.14       ape_5.0           
+ [1] maptpx_1.9-3       Rcpp_0.12.15       ape_5.0           
  [4] lattice_0.20-35    gtools_3.5.0       assertthat_0.2.0  
- [7] rprojroot_1.2      digest_0.6.13      slam_0.1-40       
+ [7] rprojroot_1.3-2    digest_0.6.15      slam_0.1-42       
 [10] R6_2.2.2           plyr_1.8.4         backports_1.1.2   
 [13] stats4_3.4.1       evaluate_0.10.1    highr_0.6         
-[16] httr_1.3.1         gplots_3.0.1       rlang_0.1.4       
-[19] lazyeval_0.2.1     gdata_2.18.0       vegan_2.4-5       
-[22] rmarkdown_1.8      readr_1.1.1        stringr_1.2.0     
-[25] munsell_0.4.3      compiler_3.4.1     pkgconfig_2.0.1   
-[28] SQUAREM_2017.10-1  mgcv_1.8-22        htmltools_0.3.6   
-[31] nnet_7.3-12        tibble_1.3.4       codetools_0.2-15  
-[34] matrixStats_0.52.2 permute_0.9-4      viridisLite_0.2.0 
-[37] MASS_7.3-47        bitops_1.0-6       grid_3.4.1        
-[40] nlme_3.1-131       gtable_0.2.0       git2r_0.20.0      
-[43] magrittr_1.5       scales_0.5.0       KernSmooth_2.23-15
-[46] stringi_1.1.6      reshape2_1.4.3     flexmix_2.3-14    
-[49] bindrcpp_0.2       xml2_1.1.1         boot_1.3-20       
-[52] cowplot_0.9.2      iterators_1.0.9    tools_3.4.1       
-[55] picante_1.6-2      glue_1.2.0         hms_0.4.0         
-[58] yaml_2.1.16        colorspace_1.3-2   cluster_2.0.6     
-[61] caTools_1.17.1     rvest_0.3.2        bindr_0.1         
-[64] modeltools_0.2-21 </code></pre>
+[16] httr_1.3.1         pillar_1.2.1       gplots_3.0.1      
+[19] rlang_0.2.0        lazyeval_0.2.1     gdata_2.18.0      
+[22] vegan_2.4-6        rmarkdown_1.9      readr_1.1.1       
+[25] stringr_1.3.0      munsell_0.4.3      compiler_3.4.1    
+[28] pkgconfig_2.0.1    SQUAREM_2017.10-1  mgcv_1.8-23       
+[31] htmltools_0.3.6    nnet_7.3-12        tibble_1.4.2      
+[34] codetools_0.2-15   matrixStats_0.53.1 permute_0.9-4     
+[37] viridisLite_0.3.0  MASS_7.3-49        bitops_1.0-6      
+[40] grid_3.4.1         nlme_3.1-131.1     gtable_0.2.0      
+[43] git2r_0.21.0       magrittr_1.5       scales_0.5.0      
+[46] KernSmooth_2.23-15 stringi_1.1.6      reshape2_1.4.3    
+[49] flexmix_2.3-14     bindrcpp_0.2       xml2_1.2.0        
+[52] boot_1.3-20        cowplot_0.9.2      iterators_1.0.9   
+[55] tools_3.4.1        picante_1.6-2      glue_1.2.0        
+[58] hms_0.4.1          yaml_2.1.18        colorspace_1.3-2  
+[61] cluster_2.0.6      caTools_1.17.1     rvest_0.3.2       
+[64] bindr_0.1          modeltools_0.2-21 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
