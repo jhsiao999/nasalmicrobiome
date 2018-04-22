@@ -101,13 +101,13 @@ $~$
 Next we save the dataset with the sample clustering labels
 
 ```{r, eval =F}
-MRobj2 = MRobj
-assayData(MRobj2)[["counts"]] = counts
-featureData(MRobj2) = AnnotatedDataFrame(data.frame(Species=rownames(counts)))
+# MRobj2 = MRobj
+# assayData(MRobj2)[["counts"]] = counts
+# featureData(MRobj2) = AnnotatedDataFrame(data.frame(Species=rownames(counts)))
 pData(MRobj)$GOM = cl
-pData(MRobj2)$GOM = cl
+#pData(MRobj2)$GOM = cl
 
-save(MRobj2, MRobj, file="../data/nasal_GOM.rdata")
+saveRDS(MRobj, file="../data/nasal_GOM.rds")
 ```
 
 
