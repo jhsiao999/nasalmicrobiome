@@ -43,7 +43,15 @@ Data processing steps are as follows:
 4. [Normalization and Batch correction](step2_normalization_batch.html)
 
 
-The output data are stored in `data/` folder. `nasal_GOM.rdata` contains `MRobj` and `MRobj2`. Both store counts that have been normalized and batch-corrected. `MRobj2` contains species-level information, while `MRobj` contains information at genus.
+Data ouptut at each step are stored in `data/` folder
+
+* `nasal_raw.rds`: output from [Build MRexperiment object](step0_build_MRexperiment.html).
+
+* `nasal_filtered`: output from [Filtering samples and OTUs](step1_filtering.html).
+
+* `nasal_normalized_batchcorrected.rdata`: output from [Normalization and Batch correction](step2_normalization_batch.html).
+
+* `nasal_GOM.rds`: output from [Grades of membership model finalized](step3_gradesOfMembership.html). Contains sample cluster information.
 
 ---
 
