@@ -12,7 +12,7 @@ Share results of nasal microbiome project.
 * Cluster analysis (Applying GoM - Grades of Membership model)
     * [Choosing number of clusters](chossing-number-of-clusters.html)
     * [GOM cluster memberships under different seeds](gom-seeds.html)
-    * [Grades of membership model](step3_gradesOfMembership.html)
+    * [Grades of membership model finalized](step3_gradesOfMembership.html)
     * [Variance explained under different k](cluster-variance-explained.html)
   
 * Cluster characteristics
