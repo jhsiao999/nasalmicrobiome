@@ -1,8 +1,9 @@
 ---
 title: "Filtering"
-author: "Joseph Paulson"
-date: "2017-12-10"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
 ---
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
@@ -36,25 +37,25 @@ We imported raw data (`nasal_raw.rds`) and excluded samples and OTUs based on th
 
 *Prior to filtering, there are 42,999 features and 201 samples*
 
-1. Low sequencing depth
+1. Low sequencing depth  
     1.1. Samples with total count < 1000  
     1.2. OTUs not present (> 0 read) in any sample  
-    1.3. Satisfies 1.1 AND 1.2
+    1.3. Satisfies 1.1 AND 1.2  
 
 *After Step 1, left with 42,982 features and 197 samples.*
     
-2. OTUs not present
-    2.1. Present (> 0 read) in 5 or more samples in 1
-    2.2. Present and quantified with > 20 read in at least one sample
-    2.3. Satisfies 2.1 OR 2.2, otherwise excluded.
+2. OTUs not present  
+    2.1. Present (> 0 read) in 5 or more samples in 1  
+    2.2. Present and quantified with > 20 read in at least one sample  
+    2.3. Satisfies 2.1 OR 2.2, otherwise excluded.  
 
 *After Step 2, left with 5,521 features and 197 samples.*
     
-3. Excluded OTUs not assigned at the Kindom level
+3. Excluded OTUs not assigned at the Kindom level  
 
-*After Step 3, left with 4,423 features and 197 samples*
+*After Step 3, left with 4,423 features and 197 samples*  
 
-In the end, 4 samples/patients were excluded from the analysis. See the bottom of this page for sample demographics. 
+In the end, 4 samples/patients were excluded from the analysis. See the bottom of this page for sample demographics.   
 
 $~$
 
