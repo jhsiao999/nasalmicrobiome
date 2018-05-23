@@ -1,0 +1,192 @@
+---
+title: "Investigate clusering probability in relation to PCA results"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+## Background and summary
+
+
+---
+
+## Analysis
+
+```{r}
+library(ggplot2)
+library(metagenomeSeq)
+library(matrixStats)
+```
+
+Load PCA
+
+```{r}
+obj <- readRDS("../data/nasal_GOM.rds")
+```
+
+Load previously computed results.
+
+```{r}
+fits <- readRDS(file = "../data/gomfits.rds")
+```
+
+Extract sampel cluster membership.
+
+```{r}
+membership <- lapply(fits, function(xx) {
+     apply(xx$omega, 1, which.max)
+  })
+```
+
+Get PCA results
+
+```{r}
+pcaRES <- function(obj,tran=TRUE,comp=1:2,norm=TRUE,log=TRUE,usePCA=TRUE,useDist=FALSE,distfun=stats::dist,dist.method="euclidian",n=NULL,...){
+  mat = returnAppropriateObj(obj,norm,log)
+  if(useDist==FALSE & usePCA==FALSE) stop("Classical MDS requires distances")
+  if(is.null(n)) n = min(nrow(mat),1000)
+
+  otusToKeep <- which(rowSums(mat)>0)
+  otuVars<-rowSds(mat[otusToKeep,])
+  otuIndices<-otusToKeep[order(otuVars,decreasing=TRUE)[seq_len(n)]]
+  mat <- mat[otuIndices,]
+
+  if(tran==TRUE){
+    mat = t(mat)
+  }
+  if(useDist==TRUE){
+    d <- distfun(mat,method=dist.method)
+  } else{ d = mat }
+
+  if(usePCA==FALSE){
+    ord = cmdscale(d,k = max(comp))
+    xl = paste("MDS component:",comp[1])
+    yl = paste("MDS component:",comp[2])
+  } else{
+    pcaRes <- prcomp(d)
+    ord <- pcaRes$x
+    vars <- pcaRes$sdev^2
+    vars <- round(vars/sum(vars),5)*100
+    xl <- sprintf("PCA %s: %.2f%% variance",colnames(ord)[comp[1]], vars[comp[1]])
+    yl <- sprintf("PCA %s: %.2f%% variance",colnames(ord)[comp[2]], vars[comp[2]])
+  }
+  return(pcaRes)
+}
+
+obj <- obj[,order(pData(obj)$GOM)]
+
+pcares <- pcaRES(obj,pch=21,bg=pData(obj)$GOM,main="")
+```
+
+save to output folder. 
+
+```{r}
+saveRDS(pcares, "../output/explore-cluster-probability.Rmd/pcares.rds")
+```
+
+
+## Results
+
+7 outliers on PCA plot. All of them below to the second cluster.
+
+
+```{r}
+all.equal(rownames(pcares$x), colnames(obj))
+pdata <- pData(obj)
+pdata$PC1 <- pcares$x[,1]
+pdata$PC2 <- pcares$x[,2]
+pdata$pc_outlier <- pdata$PC1 > 20 & pdata$PC2 < -20
+
+all.equal(rownames(pdata), rownames(fits[[1]]$omega))
+omega <- fits[[1]]$omega
+omega <- omega[match(rownames(pdata),rownames(omega)),]
+all.equal(rownames(pdata), rownames(omega))
+
+pdata$gom_prob_group1 <- omega[,1]
+pdata$gom_prob_group2 <- omega[,2]
+```
+
+* 7 PCA outliers, all belong to cluster 2, their cluster probability are not borderline.
+
+```{r}
+table(pdata$pc_outlier)
+
+table(pdata$pc_outlier, pdata$GOM)
+
+cbind(pdata$gom_prob_group1[which(pdata$pc_outlier==1)], pdata$gom_prob_group2[which(pdata$pc_outlier==1)])
+
+```
+
+* Are their borderline probablities at all?
+
+```{r}
+summary(pdata$gom_prob_group2[pdata$GOM==2 & pdata$pc_outlier==0])
+summary(pdata$gom_prob_group2[pdata$GOM==2 & pdata$pc_outlier==1])
+```
+
+The non-outliers in Group 2 are more similar to Group 1. 
+
+```{r}
+library(CountClust)
+newgroup <- pdata$GOM
+newgroup[which(pdata$pc_outlier==1 & pdata$GOM=="2")] <- "2.outlier"
+annotation <- data.frame(
+  sample_id = paste0("X", c(1:NROW(omega))),
+  tissue_label = factor(newgroup,
+                        levels = c("1", "2", "2.outlier") ) ) 
+rownames(omega) <- annotation$sample_id;
+
+StructureGGplot(omega = omega,
+                annotation = annotation,
+                palette = RColorBrewer::brewer.pal(3, "Accent"),
+                yaxis_label = "Group",
+                order_sample = TRUE,
+                axis_tick = list(axis_ticks_length = .1,
+                                 axis_ticks_lwd_y = .1,
+                                 axis_ticks_lwd_x = .1,
+                                 axis_label_size = 7,
+                                 axis_label_face = "bold"))
+```
+
+Save outlier info.
+
+```{r, eval = F}
+write.table(data.frame(rownames(pdata),newgroup)[order(newgroup, decreasing = T),],
+            col.names = F, row.names = F, quote = F,
+            file = "../output/explore-cluster-probability.Rmd/outlier.list")
+```
+
+
+
+
+
+---
+
+## Session information
+
+```{r, echo = F}
+sessionInfo()
+```
+
