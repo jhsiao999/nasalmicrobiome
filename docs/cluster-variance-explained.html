@@ -319,12 +319,12 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
+<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2018c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-02-14</p>
+<p><strong>Last updated:</strong> 2018-06-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 5b4420c</p>
+<p><strong>Code version:</strong> 47a3967</p>
 <div id="background-and-summary" class="section level2">
 <h2>Background and summary</h2>
 <p>We compare fitting under differet k and computed for every feature, sample variance in abundance that is explained by sample cluster membership.</p>
@@ -339,11 +339,17 @@ library(metagenomeSeq)</code></pre>
 <pre class="r"><code>MRobj &lt;- readRDS(&quot;../data/nasal_filtered_normed_batchcorrected.rds&quot;)
 counts &lt;- MRcounts(MRobj,norm=FALSE,log=FALSE)</code></pre>
 <p>Load previously computed results.</p>
-<pre class="r"><code>fits &lt;- readRDS(file = &quot;../data/gomfits.rds&quot;)</code></pre>
+<pre class="r"><code>clust_2 &lt;- readRDS(&quot;../output/gom-k2-best-seed-67.rds&quot;)
+clust_3 &lt;- readRDS(&quot;../output/gom-k3-best-seed-67.rds&quot;)
+clust_4 &lt;- readRDS(&quot;../output/gom-k4-best-seed-59.rds&quot;)
+clust_5 &lt;- readRDS(&quot;../output/gom-k5-best-seed-307.rds&quot;)
+fits &lt;- c(clust_2, clust_3, clust_4, clust_5)
+names(fits) &lt;- c(&quot;clust_2&quot;, &quot;clust_3&quot;, &quot;clust_4&quot;, &quot;clust_5&quot;)</code></pre>
 <p>Extract sampel cluster membership.</p>
 <pre class="r"><code>membership &lt;- lapply(fits, function(xx) {
      apply(xx$omega, 1, which.max)
-  })</code></pre>
+  })
+names(membership) &lt;- c(&quot;clust_2&quot;, &quot;clust_3&quot;, &quot;clust_4&quot;, &quot;clust_5&quot;)</code></pre>
 <p>Compute variance explained.</p>
 <pre class="r"><code>varprop_species &lt;- lapply(1:length(membership), function(index) {
   which_sample &lt;- which(colnames(counts) %in% names(membership[[index]]))
@@ -360,37 +366,151 @@ saveRDS(varprop_species, file = &quot;../data/varprop.rds&quot;)</code></pre>
 <pre class="r"><code>varprop &lt;- readRDS(&quot;../data/varprop.rds&quot;)
 varprop_long &lt;- data.frame(
   prop = do.call(c, varprop),
-  cluster = as.factor(rep(2:10, each = length(varprop[[1]]))))
+  cluster = factor(rep(2:5, each = nrow(varprop))) )
+varprop_long$cluster &lt;- as.numeric(as.character(varprop_long$cluster))</code></pre>
+<p>K = 2 to 5</p>
+<pre class="r"><code>ggplot(varprop_long, aes(x = factor(cluster), y = prop,
+                            col = factor(cluster)), size = .2) +
+  geom_violin(trim = FALSE, size=.5) +
+  geom_boxplot(width=0.1, size = .6) +
+  labs(x = &quot;Number of clusters&quot;, y = &quot;Proportion variance explained&quot;)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="compare-variances-explained" class="section level2">
+<h2>Compare variances explained</h2>
+<p>Sig difference between K=2 vs K=4,5, but no sig. difference between K=2 and K=3.</p>
+<pre class="r"><code>wilcox.test(varprop$clust_2, varprop$clust_3)</code></pre>
+<pre><code>
+    Wilcoxon rank sum test with continuity correction
 
-ggplot(varprop_long, aes(x = cluster, y = prop,
-                            col = cluster), size = .2) +
-  geom_violin(trim = FALSE, size=.5) +
-  geom_boxplot(width=0.1, size = .6) +
-  labs(x = &quot;Number of clusters&quot;, y = &quot;Proportion variance explained&quot;)</code></pre>
-<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>varprop_long$cluster &lt;- as.numeric(as.character(varprop_long$cluster))
-ggplot(subset(varprop_long, cluster  &lt; 6), aes(x = as.factor(cluster), y = prop,
-                            col = as.factor(cluster)), size = .2) +
-  geom_violin(trim = FALSE, size=.5) +
-  geom_boxplot(width=0.1, size = .6) +
-  labs(x = &quot;Number of clusters&quot;, y = &quot;Proportion variance explained&quot;)</code></pre>
-<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>for (i in 1:4) {
-  cat(c(2:5)[i], &quot;clusters \n&quot;)
-  print(summary(varprop[[i]]))
-}</code></pre>
-<pre><code>2 clusters 
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-0.000000 0.002148 0.030757 0.072763 0.116721 0.423194 
-3 clusters 
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-0.000000 0.004186 0.022204 0.049274 0.068501 0.291761 
-4 clusters 
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-4.800e-07 4.451e-03 2.434e-02 3.920e-02 6.128e-02 2.288e-01 
-5 clusters 
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-5.000e-08 3.904e-03 1.960e-02 4.300e-02 6.926e-02 2.031e-01 </code></pre>
+data:  varprop$clust_2 and varprop$clust_3
+W = 185720, p-value = 6.513e-10
+alternative hypothesis: true location shift is not equal to 0</code></pre>
+<pre class="r"><code>wilcox.test(varprop$clust_2, varprop$clust_4)</code></pre>
+<pre><code>
+    Wilcoxon rank sum test with continuity correction
+
+data:  varprop$clust_2 and varprop$clust_4
+W = 183850, p-value = 5.653e-09
+alternative hypothesis: true location shift is not equal to 0</code></pre>
+<pre class="r"><code>wilcox.test(varprop$clust_2, varprop$clust_5)</code></pre>
+<pre><code>
+    Wilcoxon rank sum test with continuity correction
+
+data:  varprop$clust_2 and varprop$clust_5
+W = 166400, p-value = 0.01104
+alternative hypothesis: true location shift is not equal to 0</code></pre>
+<p>Consider within-sample diversity difference for when K=3.</p>
+<pre class="r"><code>library(data.table)
+shannon_values &lt;- fread(&quot;~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv&quot;)
+
+all.equal(shannon_values$V1, rownames(fits$clust_3$omega))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>shannon_values$GOM &lt;- sapply(1:nrow(fits$clust_3$omega), function(i) {
+  which.max(fits$clust_3$omega[i,]) })
+
+boxplot(shannon_values$V2~ shannon_values$GOM)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>levels(shannon_values$GOM) &lt;- c(&quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;)
+library(ggplot2)
+ggplot(shannon_values, aes(x=GOM, y = V2, fill = factor(GOM))) +
+  geom_violin(col = &quot;gray50&quot;) +
+  scale_fill_manual(values = c(brewer.pal(12,&quot;Set3&quot;)[1],
+                                 brewer.pal(12,&quot;Set3&quot;)[2],
+                                 brewer.pal(12,&quot;Set3&quot;)[3])) +
+  geom_boxplot(width=.25) + ylab(&quot;Shannon diversity&quot;) +
+  scale_x_discrete(name = &quot;Cluster membership&quot;,
+                   labels = c(&quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;)) +
+  guides(fill=guide_legend(title=&quot;&quot;)) +
+  ggtitle(&quot;Alpha diversity of K=3&quot;)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Consider within-sample diversity difference for when K=4.</p>
+<pre class="r"><code>library(data.table)
+shannon_values &lt;- fread(&quot;~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv&quot;)
+
+all.equal(shannon_values$V1, rownames(fits$clust_4$omega))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>shannon_values$GOM &lt;- sapply(1:nrow(fits$clust_4$omega), function(i) {
+  which.max(fits$clust_4$omega[i,]) })
+
+levels(shannon_values$GOM) &lt;- c(&quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;, &quot;Group 4&quot;)
+library(ggplot2)
+ggplot(shannon_values, aes(x=GOM, y = V2, fill = factor(GOM))) +
+  geom_violin(col = &quot;gray50&quot;) +
+  scale_fill_manual(values = c(brewer.pal(12,&quot;Set3&quot;)[1],
+                                 brewer.pal(12,&quot;Set3&quot;)[2],
+                                 brewer.pal(12,&quot;Set3&quot;)[3],
+                                 brewer.pal(12,&quot;Set3&quot;)[4])) +
+  geom_boxplot(width=.25) + ylab(&quot;Shannon diversity&quot;) +
+  scale_x_discrete(name = &quot;Cluster membership&quot;,
+                   labels = c(&quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;, &quot;Group 4&quot;)) +
+  guides(fill=guide_legend(title=&quot;&quot;)) +
+  ggtitle(&quot;Alpha diversity of K=4&quot;)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Consider within-sample diversity difference for when K=5.</p>
+<pre class="r"><code>library(data.table)
+shannon_values &lt;- fread(&quot;~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv&quot;)
+
+all.equal(shannon_values$V1, rownames(fits$clust_5$omega))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>shannon_values$GOM &lt;- sapply(1:nrow(fits$clust_5$omega), function(i) {
+  which.max(fits$clust_5$omega[i,]) })
+
+boxplot(shannon_values$V2~ shannon_values$GOM)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>levels(shannon_values$GOM) &lt;- c(&quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;, &quot;Group 4&quot;, &quot;Group 5&quot;)
+library(ggplot2)
+ggplot(shannon_values, aes(x=GOM, y = V2, fill = factor(GOM))) +
+  geom_violin(col = &quot;gray50&quot;) +
+  scale_fill_manual(values = c(brewer.pal(12,&quot;Set3&quot;)[1],
+                                 brewer.pal(12,&quot;Set3&quot;)[2],
+                                 brewer.pal(12,&quot;Set3&quot;)[3],
+                                 brewer.pal(12,&quot;Set3&quot;)[4],
+                                 brewer.pal(12,&quot;Set3&quot;)[5])) +
+  geom_boxplot(width=.25) + ylab(&quot;Shannon diversity&quot;) +
+  scale_x_discrete(name = &quot;Cluster membership&quot;,
+                   labels = c(&quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;, &quot;Group 4&quot;, &quot;Group 5&quot;)) +
+  guides(fill=guide_legend(title=&quot;&quot;)) +
+  ggtitle(&quot;Alpha diversity of K=5&quot;)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="consider-when-k2-the-taxa-that-has-high-prob-of-variance-explained" class="section level2">
+<h2>Consider when K=2, the taxa that has high prob of variance explained</h2>
+<pre class="r"><code>rownames(counts)[order(varprop$clust_2, decreasing = F)[1:10]]</code></pre>
+<pre><code> [1] &quot;k__Bacteria;p__Proteobacteria;c__Betaproteobacteria;o__Hydrogenophilales;f__Hydrogenophilaceae;g__Thiobacillus;s__&quot;
+ [2] &quot;k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Veillonellaceae;g__Veillonella;s__&quot;                    
+ [3] &quot;k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Nocardioidaceae;g__Friedmanniella;s__&quot;       
+ [4] &quot;k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Geodermatophilaceae;g__Modestobacter;s__&quot;    
+ [5] &quot;k__Bacteria;p__Bacteroidetes;c__[Saprospirae];o__[Saprospirales];f__Chitinophagaceae;g__Sediminibacterium;s__&quot;     
+ [6] &quot;k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Cellulomonadaceae;g__Cellulomonas;s__&quot;       
+ [7] &quot;s__subflava&quot;                                                                                                       
+ [8] &quot;k__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;f__Bacillaceae;g__Geobacillus;s__&quot;                              
+ [9] &quot;k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae;g__Klebsiella;s__&quot; 
+[10] &quot;k__Bacteria;p__Proteobacteria;c__Betaproteobacteria;o__Burkholderiales;f__Comamonadaceae;g__Comamonas;s__&quot;         </code></pre>
+<pre class="r"><code>library(data.table)
+de_results &lt;- fread(&quot;~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/tbl.tsv&quot;)
+
+all.equal(de_results$V1[match(rownames(counts), de_results$V1)], rownames(counts))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>de_results &lt;- de_results[match(rownames(counts), de_results$V1),]
+
+plot(varprop$clust_2,-log10(de_results$adjPvalue),
+     xlab = &quot;Proportion of variance explained of K=2&quot;,
+     ylab=&quot;-log10(adjusted P-value)&quot;,
+     pch=16, cex=.7,
+     col=(de_results$adjPvalue&lt;.01)+1)
+abline(h=2,lty=2,col=&quot;black&quot;)</code></pre>
+<p><img src="figure/cluster-variance-explained.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>de_results$varprop_clust2 &lt;- varprop$clust_2</code></pre>
+<p>Append the variance proportion explained to the FDR results.</p>
+<pre class="r"><code>de_results &lt;- de_results[order(de_results$adjPvalues),]
+write.table(de_results,
+            &quot;~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/tbl_updated.tsv&quot;,
+            quote=F, col.names = NA, sep=&quot;\t&quot;)
+
+#tmp &lt;- fread(&quot;~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/tbl_updated.tsv&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -411,23 +531,24 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] metagenomeSeq_1.20.1 RColorBrewer_1.1-2   glmnet_2.0-13       
-[4] foreach_1.4.4        Matrix_1.2-12        limma_3.34.4        
-[7] Biobase_2.38.0       BiocGenerics_0.24.0  ggplot2_2.2.1       
+ [1] data.table_1.11.0    metagenomeSeq_1.21.1 RColorBrewer_1.1-2  
+ [4] glmnet_2.0-16        foreach_1.4.4        Matrix_1.2-14       
+ [7] limma_3.34.9         Biobase_2.38.0       BiocGenerics_0.24.0 
+[10] ggplot2_2.2.1       
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14       compiler_3.4.1     git2r_0.20.0      
- [4] plyr_1.8.4         bitops_1.0-6       iterators_1.0.9   
- [7] tools_3.4.1        digest_0.6.13      evaluate_0.10.1   
-[10] tibble_1.3.4       gtable_0.2.0       lattice_0.20-35   
-[13] rlang_0.1.4        yaml_2.1.16        stringr_1.2.0     
-[16] knitr_1.17         gtools_3.5.0       caTools_1.17.1    
-[19] rprojroot_1.2      grid_3.4.1         rmarkdown_1.8     
-[22] gdata_2.18.0       magrittr_1.5       backports_1.1.2   
-[25] scales_0.5.0       gplots_3.0.1       codetools_0.2-15  
-[28] htmltools_0.3.6    matrixStats_0.52.2 colorspace_1.3-2  
-[31] labeling_0.3       KernSmooth_2.23-15 stringi_1.1.6     
-[34] lazyeval_0.2.1     munsell_0.4.3     </code></pre>
+ [1] Rcpp_0.12.16       pillar_1.2.2       compiler_3.4.1    
+ [4] git2r_0.21.0       plyr_1.8.4         bitops_1.0-6      
+ [7] iterators_1.0.9    tools_3.4.1        digest_0.6.15     
+[10] evaluate_0.10.1    tibble_1.4.2       gtable_0.2.0      
+[13] lattice_0.20-35    rlang_0.2.0        yaml_2.1.19       
+[16] stringr_1.3.0      knitr_1.20         caTools_1.17.1    
+[19] gtools_3.5.0       rprojroot_1.3-2    grid_3.4.1        
+[22] rmarkdown_1.9      gdata_2.18.0       magrittr_1.5      
+[25] backports_1.1.2    scales_0.5.0       gplots_3.0.1      
+[28] codetools_0.2-15   htmltools_0.3.6    matrixStats_0.53.1
+[31] colorspace_1.3-2   labeling_0.3       KernSmooth_2.23-15
+[34] stringi_1.2.2      lazyeval_0.2.1     munsell_0.4.3     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
