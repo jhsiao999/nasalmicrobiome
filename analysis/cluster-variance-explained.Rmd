@@ -52,7 +52,12 @@ counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
 Load previously computed results.
 
 ```{r}
-fits <- readRDS(file = "../data/gomfits.rds")
+clust_2 <- readRDS("../output/gom-k2-best-seed-67.rds")
+clust_3 <- readRDS("../output/gom-k3-best-seed-67.rds")
+clust_4 <- readRDS("../output/gom-k4-best-seed-59.rds")
+clust_5 <- readRDS("../output/gom-k5-best-seed-307.rds")
+fits <- c(clust_2, clust_3, clust_4, clust_5)
+names(fits) <- c("clust_2", "clust_3", "clust_4", "clust_5")
 ```
 
 Extract sampel cluster membership.
@@ -61,6 +66,7 @@ Extract sampel cluster membership.
 membership <- lapply(fits, function(xx) {
      apply(xx$omega, 1, which.max)
   })
+names(membership) <- c("clust_2", "clust_3", "clust_4", "clust_5")
 ```
 
 Compute variance explained.
@@ -85,25 +91,148 @@ Plot variance explained
 varprop <- readRDS("../data/varprop.rds")
 varprop_long <- data.frame(
   prop = do.call(c, varprop),
-  cluster = as.factor(rep(2:10, each = length(varprop[[1]]))))
-
-ggplot(varprop_long, aes(x = cluster, y = prop,
-                            col = cluster), size = .2) +
-  geom_violin(trim = FALSE, size=.5) +
-  geom_boxplot(width=0.1, size = .6) +
-  labs(x = "Number of clusters", y = "Proportion variance explained")
-
+  cluster = factor(rep(2:5, each = nrow(varprop))) )
 varprop_long$cluster <- as.numeric(as.character(varprop_long$cluster))
-ggplot(subset(varprop_long, cluster  < 6), aes(x = as.factor(cluster), y = prop,
-                            col = as.factor(cluster)), size = .2) +
+```
+
+K = 2 to 5
+
+```{r}
+ggplot(varprop_long, aes(x = factor(cluster), y = prop,
+                            col = factor(cluster)), size = .2) +
   geom_violin(trim = FALSE, size=.5) +
   geom_boxplot(width=0.1, size = .6) +
   labs(x = "Number of clusters", y = "Proportion variance explained")
+```
 
-for (i in 1:4) {
-  cat(c(2:5)[i], "clusters \n")
-  print(summary(varprop[[i]]))
-}
+---
+
+## Compare variances explained
+
+Sig difference between K=2 vs K=4,5, but no sig. difference between K=2 and K=3.
+
+```{r}
+wilcox.test(varprop$clust_2, varprop$clust_3)
+wilcox.test(varprop$clust_2, varprop$clust_4)
+wilcox.test(varprop$clust_2, varprop$clust_5)
+```
+
+Consider within-sample diversity difference for when K=3.
+
+```{r}
+library(data.table)
+shannon_values <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv")
+
+all.equal(shannon_values$V1, rownames(fits$clust_3$omega))
+
+shannon_values$GOM <- sapply(1:nrow(fits$clust_3$omega), function(i) {
+  which.max(fits$clust_3$omega[i,]) })
+
+boxplot(shannon_values$V2~ shannon_values$GOM)
+
+levels(shannon_values$GOM) <- c("Group 1", "Group 2", "Group 3")
+library(ggplot2)
+ggplot(shannon_values, aes(x=GOM, y = V2, fill = factor(GOM))) +
+  geom_violin(col = "gray50") +
+  scale_fill_manual(values = c(brewer.pal(12,"Set3")[1],
+                                 brewer.pal(12,"Set3")[2],
+                                 brewer.pal(12,"Set3")[3])) +
+  geom_boxplot(width=.25) + ylab("Shannon diversity") +
+  scale_x_discrete(name = "Cluster membership",
+                   labels = c("Group 1", "Group 2", "Group 3")) +
+  guides(fill=guide_legend(title="")) +
+  ggtitle("Alpha diversity of K=3")
+```
+
+
+Consider within-sample diversity difference for when K=4.
+
+```{r}
+library(data.table)
+shannon_values <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv")
+
+all.equal(shannon_values$V1, rownames(fits$clust_4$omega))
+
+shannon_values$GOM <- sapply(1:nrow(fits$clust_4$omega), function(i) {
+  which.max(fits$clust_4$omega[i,]) })
+
+levels(shannon_values$GOM) <- c("Group 1", "Group 2", "Group 3", "Group 4")
+library(ggplot2)
+ggplot(shannon_values, aes(x=GOM, y = V2, fill = factor(GOM))) +
+  geom_violin(col = "gray50") +
+  scale_fill_manual(values = c(brewer.pal(12,"Set3")[1],
+                                 brewer.pal(12,"Set3")[2],
+                                 brewer.pal(12,"Set3")[3],
+                                 brewer.pal(12,"Set3")[4])) +
+  geom_boxplot(width=.25) + ylab("Shannon diversity") +
+  scale_x_discrete(name = "Cluster membership",
+                   labels = c("Group 1", "Group 2", "Group 3", "Group 4")) +
+  guides(fill=guide_legend(title="")) +
+  ggtitle("Alpha diversity of K=4")
+```
+
+
+Consider within-sample diversity difference for when K=5.
+
+```{r}
+library(data.table)
+shannon_values <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv")
+
+all.equal(shannon_values$V1, rownames(fits$clust_5$omega))
+
+shannon_values$GOM <- sapply(1:nrow(fits$clust_5$omega), function(i) {
+  which.max(fits$clust_5$omega[i,]) })
+
+boxplot(shannon_values$V2~ shannon_values$GOM)
+
+levels(shannon_values$GOM) <- c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5")
+library(ggplot2)
+ggplot(shannon_values, aes(x=GOM, y = V2, fill = factor(GOM))) +
+  geom_violin(col = "gray50") +
+  scale_fill_manual(values = c(brewer.pal(12,"Set3")[1],
+                                 brewer.pal(12,"Set3")[2],
+                                 brewer.pal(12,"Set3")[3],
+                                 brewer.pal(12,"Set3")[4],
+                                 brewer.pal(12,"Set3")[5])) +
+  geom_boxplot(width=.25) + ylab("Shannon diversity") +
+  scale_x_discrete(name = "Cluster membership",
+                   labels = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5")) +
+  guides(fill=guide_legend(title="")) +
+  ggtitle("Alpha diversity of K=5")
+```
+
+---
+
+## Consider when K=2, the taxa that has high prob of variance explained
+
+```{r}
+rownames(counts)[order(varprop$clust_2, decreasing = F)[1:10]]
+
+library(data.table)
+de_results <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/tbl.tsv")
+
+all.equal(de_results$V1[match(rownames(counts), de_results$V1)], rownames(counts))
+de_results <- de_results[match(rownames(counts), de_results$V1),]
+
+plot(varprop$clust_2,-log10(de_results$adjPvalue),
+     xlab = "Proportion of variance explained of K=2",
+     ylab="-log10(adjusted P-value)",
+     pch=16, cex=.7,
+     col=(de_results$adjPvalue<.01)+1)
+abline(h=2,lty=2,col="black")
+
+de_results$varprop_clust2 <- varprop$clust_2
+```
+
+Append the variance proportion explained to the FDR results.
+
+```{r, eval=F}
+de_results <- de_results[order(de_results$adjPvalues),]
+write.table(de_results,
+            "~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/tbl_updated.tsv",
+            quote=F, col.names = NA, sep="\t")
+
+#tmp <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/tbl_updated.tsv")
 ```
 
 
