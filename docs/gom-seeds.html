@@ -319,19 +319,19 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
+<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2018c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-02-14</p>
+<p><strong>Last updated:</strong> 2018-06-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 5b4420c</p>
+<p><strong>Code version:</strong> e30803e</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>Motivation: when running <code>CountClut</code>, sample cluster assignment may differ between different random seeds, despite similar cluster characteristics in feature abundancce. This issue is not unique to <code>CountClust</code>. In model-based unsupervised clustering methods, the parameter space is usually complex, and as a result, difficult to find global maximum of the model likelihood.</p>
-<p>Here I run <code>CountClust</code> under 100 different random seeds. I compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent <code>CountClust</code> analysis.</p>
-<p>Across these 100 random seeds <code>409</code> produced the largest BF and is thus chosen as our random seed. This chosen random seed (best seed) is then used in our final results (<a href="https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html" class="uri">https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html</a>).</p>
-<p><span class="math inline">\(~\)</span></p>
+<p>I run <code>CountClust</code> under 100 different random seeds and then compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent <code>CountClust</code> analysis.</p>
+<p>This document shows the analysis steps for when K=2. Results show that for when K=2, across 100 random seeds <code>409</code> produced the largest BF and is thus chosen as our random seed. This chosen random seed (best seed) is then used in our final results (<a href="https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html" class="uri">https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html</a>).</p>
+<p>The fitting results for K=2 to 5 under the same 100 random seeds are saved in <code>output/gom-seeds-k-2.rds</code>, <code>output/gom-seeds-k-3.rds</code>, <code>output/gom-seeds-k-4.rds</code>, and <code>output/gom-seeds-k-5.rds</code>.</p>
 <hr />
 </div>
 <div id="package" class="section level2">
@@ -357,16 +357,19 @@ phenoData
   varLabels: StudyID age ... infnone (94 total)
   varMetadata: labelDescription
 featureData
-  featureNames: denovo6 denovo17 ... denovo42992 (4423 total)
+  featureNames:
+    k__Bacteria;p__[Thermi];c__Deinococci;o__Deinococcales;f__Deinococcaceae;g__CM44;s__
+    k__Bacteria;p__[Thermi];c__Deinococci;o__Deinococcales;f__Deinococcaceae;g__Deinococcus;s__
+    ... s__zeae (553 total)
   fvarLabels: Kingdom Phylum ... Species (7 total)
   fvarMetadata: labelDescription
 experimentData: use &#39;experimentData(object)&#39;
 Annotation:  </code></pre>
-<p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
-<div id="random-seeds" class="section level2">
-<h2>100 random seeds</h2>
+<div id="k2" class="section level2">
+<h2>K=2</h2>
+<p>100 random seeds</p>
 <p>Apply <code>CountClust</code> to fit grades of membership model.</p>
 <pre class="r"><code>counts &lt;- MRcounts(MRobj,norm=FALSE,log=FALSE)
 
@@ -391,9 +394,6 @@ saveRDS(res, file = &quot;../data/res.rds&quot;)</code></pre>
 <pre><code>[1] 19</code></pre>
 <pre class="r"><code>saveRDS(res[[19]], file = &quot;../output/gom-seeds.Rmd/res_best_seed_67.rds&quot;)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
-</div>
-<div id="best-seeds" class="section level2">
-<h2>Best seeds</h2>
 <p>Results using the seed with the highest BF.</p>
 <pre class="r"><code>res_best &lt;- readRDS(file = &quot;../output/gom-seeds.Rmd/res_best_seed_67.rds&quot;)</code></pre>
 <pre class="r"><code>cluster &lt;- apply(res_best$omega, 1, which.max)
@@ -1399,7 +1399,34 @@ table(cluster)</code></pre>
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="k3-to-5" class="section level2">
+<h2>K=3 to 5</h2>
+<p>Code in <code>code/gom-seeds.R</code>.</p>
+<pre class="r"><code>clust_2 &lt;- readRDS(&quot;../output/gom-seeds-k-2.rds&quot;)
+clust_3 &lt;- readRDS(&quot;../output/gom-seeds-k-3.rds&quot;)
+clust_4 &lt;- readRDS(&quot;../output/gom-seeds-k-4.rds&quot;)
+clust_5 &lt;- readRDS(&quot;../output/gom-seeds-k-5.rds&quot;)</code></pre>
+<p>Identify the best seed.</p>
+<p>K=2: 67; K=3: 67, K=4: 59; K=5: 307.</p>
+<pre class="r"><code>seeds[which.max(lapply(clust_2, &quot;[[&quot;, 4))]</code></pre>
+<pre><code>[1] 67</code></pre>
+<pre class="r"><code>seeds[which.max(lapply(clust_3, &quot;[[&quot;, 4))]</code></pre>
+<pre><code>[1] 67</code></pre>
+<pre class="r"><code>seeds[which.max(lapply(clust_4, &quot;[[&quot;, 4))]</code></pre>
+<pre><code>[1] 59</code></pre>
+<pre class="r"><code>seeds[which.max(lapply(clust_5, &quot;[[&quot;, 4))]</code></pre>
+<pre><code>[1] 307</code></pre>
+<p>save the best seeds.</p>
+<pre class="r"><code>saveRDS(clust_2[which.max(lapply(clust_2, &quot;[[&quot;, 4))],
+        &quot;../output/gom-k2-best-seed-67.rds&quot;)
+saveRDS(clust_3[which.max(lapply(clust_3, &quot;[[&quot;, 4))],
+        &quot;../output/gom-k3-best-seed-67.rds&quot;)
+saveRDS(clust_4[which.max(lapply(clust_4, &quot;[[&quot;, 4))],
+        &quot;../output/gom-k4-best-seed-59.rds&quot;)
+saveRDS(clust_5[which.max(lapply(clust_5, &quot;[[&quot;, 4))],
+        &quot;../output/gom-k5-best-seed-307.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-info" class="section level2">
@@ -1420,35 +1447,35 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.20.1
- [4] RColorBrewer_1.1-2   glmnet_2.0-13        foreach_1.4.4       
- [7] Matrix_1.2-12        limma_3.34.4         Biobase_2.38.0      
-[10] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.6.1    
-[13] knitr_1.17          
+ [1] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.21.1
+ [4] RColorBrewer_1.1-2   glmnet_2.0-16        foreach_1.4.4       
+ [7] Matrix_1.2-14        limma_3.34.9         Biobase_2.38.0      
+[10] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.8.0    
+[13] knitr_1.20          
 
 loaded via a namespace (and not attached):
- [1] maptpx_1.9-3       Rcpp_0.12.14       ape_5.0           
- [4] lattice_0.20-35    gtools_3.5.0       assertthat_0.2.0  
- [7] rprojroot_1.2      digest_0.6.13      slam_0.1-40       
-[10] R6_2.2.2           plyr_1.8.4         backports_1.1.2   
-[13] stats4_3.4.1       evaluate_0.10.1    highr_0.6         
-[16] httr_1.3.1         gplots_3.0.1       rlang_0.1.4       
-[19] lazyeval_0.2.1     gdata_2.18.0       vegan_2.4-5       
-[22] rmarkdown_1.8      readr_1.1.1        stringr_1.2.0     
-[25] munsell_0.4.3      compiler_3.4.1     pkgconfig_2.0.1   
-[28] SQUAREM_2017.10-1  mgcv_1.8-22        htmltools_0.3.6   
-[31] nnet_7.3-12        tibble_1.3.4       codetools_0.2-15  
-[34] matrixStats_0.52.2 permute_0.9-4      viridisLite_0.2.0 
-[37] MASS_7.3-47        bitops_1.0-6       grid_3.4.1        
-[40] nlme_3.1-131       gtable_0.2.0       git2r_0.20.0      
-[43] magrittr_1.5       scales_0.5.0       KernSmooth_2.23-15
-[46] stringi_1.1.6      reshape2_1.4.3     flexmix_2.3-14    
-[49] bindrcpp_0.2       xml2_1.1.1         boot_1.3-20       
-[52] cowplot_0.9.2      iterators_1.0.9    tools_3.4.1       
-[55] picante_1.6-2      glue_1.2.0         hms_0.4.0         
-[58] yaml_2.1.16        colorspace_1.3-2   cluster_2.0.6     
-[61] caTools_1.17.1     rvest_0.3.2        bindr_0.1         
-[64] modeltools_0.2-21 </code></pre>
+ [1] httr_1.3.1         viridisLite_0.3.0  gtools_3.5.0      
+ [4] assertthat_0.2.0   highr_0.6          stats4_3.4.1      
+ [7] yaml_2.1.19        slam_0.1-43        pillar_1.2.2      
+[10] backports_1.1.2    lattice_0.20-35    glue_1.2.0        
+[13] digest_0.6.15      rvest_0.3.2        colorspace_1.3-2  
+[16] picante_1.6-2      cowplot_0.9.2      htmltools_0.3.6   
+[19] plyr_1.8.4         pkgconfig_2.0.1    scales_0.5.0      
+[22] gdata_2.18.0       git2r_0.21.0       tibble_1.4.2      
+[25] mgcv_1.8-23        nnet_7.3-12        lazyeval_0.2.1    
+[28] magrittr_1.5       evaluate_0.10.1    nlme_3.1-137      
+[31] MASS_7.3-50        gplots_3.0.1       xml2_1.2.0        
+[34] vegan_2.5-1        tools_3.4.1        hms_0.4.2         
+[37] matrixStats_0.53.1 stringr_1.3.0      munsell_0.4.3     
+[40] cluster_2.0.7-1    bindrcpp_0.2.2     compiler_3.4.1    
+[43] caTools_1.17.1     rlang_0.2.0        grid_3.4.1        
+[46] iterators_1.0.9    rstudioapi_0.7     bitops_1.0-6      
+[49] rmarkdown_1.9      boot_1.3-20        gtable_0.2.0      
+[52] codetools_0.2-15   flexmix_2.3-14     reshape2_1.4.3    
+[55] R6_2.2.2           bindr_0.1.1        rprojroot_1.3-2   
+[58] maptpx_1.9-3       KernSmooth_2.23-15 permute_0.9-4     
+[61] readr_1.1.1        ape_5.1            modeltools_0.2-21 
+[64] stringi_1.2.2      SQUAREM_2017.10-1  Rcpp_0.12.16      </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
