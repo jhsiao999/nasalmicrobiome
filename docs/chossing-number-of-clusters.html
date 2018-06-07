@@ -319,12 +319,12 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2017c.
+<pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2018c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-02-14</p>
+<p><strong>Last updated:</strong> 2018-06-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 131b5a9</p>
+<p><strong>Code version:</strong> 852b84b</p>
 <hr />
 <div id="background-and-summar" class="section level2">
 <h2>Background and summar</h2>
@@ -354,7 +354,10 @@ phenoData
   varLabels: StudyID age ... infnone (94 total)
   varMetadata: labelDescription
 featureData
-  featureNames: denovo6 denovo17 ... denovo42992 (4423 total)
+  featureNames:
+    k__Bacteria;p__[Thermi];c__Deinococci;o__Deinococcales;f__Deinococcaceae;g__CM44;s__
+    k__Bacteria;p__[Thermi];c__Deinococci;o__Deinococcales;f__Deinococcaceae;g__Deinococcus;s__
+    ... s__zeae (553 total)
   fvarLabels: Kingdom Phylum ... Species (7 total)
   fvarMetadata: labelDescription
 experimentData: use &#39;experimentData(object)&#39;
@@ -441,34 +444,35 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] vegan_2.4-5          lattice_0.20-35      permute_0.9-4       
- [4] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.20.1
- [7] RColorBrewer_1.1-2   glmnet_2.0-13        foreach_1.4.4       
-[10] Matrix_1.2-12        limma_3.34.4         Biobase_2.38.0      
-[13] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.6.1    
-[16] knitr_1.17          
+ [1] vegan_2.5-1          lattice_0.20-35      permute_0.9-4       
+ [4] CountClust_1.4.1     ggplot2_2.2.1        metagenomeSeq_1.21.1
+ [7] RColorBrewer_1.1-2   glmnet_2.0-16        foreach_1.4.4       
+[10] Matrix_1.2-14        limma_3.34.9         Biobase_2.38.0      
+[13] BiocGenerics_0.24.0  dplyr_0.7.4          kableExtra_0.8.0    
+[16] knitr_1.20          
 
 loaded via a namespace (and not attached):
- [1] maptpx_1.9-3       Rcpp_0.12.14       ape_5.0           
- [4] gtools_3.5.0       assertthat_0.2.0   rprojroot_1.2     
- [7] digest_0.6.13      slam_0.1-40        R6_2.2.2          
-[10] plyr_1.8.4         backports_1.1.2    stats4_3.4.1      
-[13] evaluate_0.10.1    httr_1.3.1         gplots_3.0.1      
-[16] rlang_0.1.4        lazyeval_0.2.1     gdata_2.18.0      
-[19] rmarkdown_1.8      readr_1.1.1        stringr_1.2.0     
-[22] munsell_0.4.3      compiler_3.4.1     pkgconfig_2.0.1   
-[25] SQUAREM_2017.10-1  mgcv_1.8-22        htmltools_0.3.6   
-[28] nnet_7.3-12        tibble_1.3.4       codetools_0.2-15  
-[31] matrixStats_0.52.2 viridisLite_0.2.0  MASS_7.3-47       
-[34] bitops_1.0-6       grid_3.4.1         nlme_3.1-131      
-[37] gtable_0.2.0       git2r_0.20.0       magrittr_1.5      
-[40] scales_0.5.0       KernSmooth_2.23-15 stringi_1.1.6     
-[43] reshape2_1.4.3     flexmix_2.3-14     bindrcpp_0.2      
-[46] xml2_1.1.1         boot_1.3-20        cowplot_0.9.2     
-[49] iterators_1.0.9    tools_3.4.1        picante_1.6-2     
-[52] glue_1.2.0         hms_0.4.0          yaml_2.1.16       
-[55] colorspace_1.3-2   cluster_2.0.6      caTools_1.17.1    
-[58] rvest_0.3.2        bindr_0.1          modeltools_0.2-21 </code></pre>
+ [1] httr_1.3.1         viridisLite_0.3.0  gtools_3.5.0      
+ [4] assertthat_0.2.0   stats4_3.4.1       yaml_2.1.19       
+ [7] slam_0.1-43        pillar_1.2.2       backports_1.1.2   
+[10] glue_1.2.0         digest_0.6.15      rvest_0.3.2       
+[13] colorspace_1.3-2   picante_1.6-2      cowplot_0.9.2     
+[16] htmltools_0.3.6    plyr_1.8.4         pkgconfig_2.0.1   
+[19] scales_0.5.0       gdata_2.18.0       git2r_0.21.0      
+[22] tibble_1.4.2       mgcv_1.8-23        nnet_7.3-12       
+[25] lazyeval_0.2.1     magrittr_1.5       evaluate_0.10.1   
+[28] nlme_3.1-137       MASS_7.3-50        gplots_3.0.1      
+[31] xml2_1.2.0         tools_3.4.1        hms_0.4.2         
+[34] matrixStats_0.53.1 stringr_1.3.0      munsell_0.4.3     
+[37] cluster_2.0.7-1    bindrcpp_0.2.2     compiler_3.4.1    
+[40] caTools_1.17.1     rlang_0.2.0        grid_3.4.1        
+[43] iterators_1.0.9    rstudioapi_0.7     bitops_1.0-6      
+[46] rmarkdown_1.9      boot_1.3-20        gtable_0.2.0      
+[49] codetools_0.2-15   flexmix_2.3-14     reshape2_1.4.3    
+[52] R6_2.2.2           bindr_0.1.1        rprojroot_1.3-2   
+[55] maptpx_1.9-3       KernSmooth_2.23-15 readr_1.1.1       
+[58] ape_5.1            modeltools_0.2-21  stringi_1.2.2     
+[61] SQUAREM_2017.10-1  Rcpp_0.12.16      </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
