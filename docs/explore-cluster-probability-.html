@@ -321,12 +321,14 @@ shared across the workflowr files. -->
 <!-- Insert the date the file was last updated -->
 <pre><code>Warning in as.POSIXlt.POSIXct(Sys.time()): unknown timezone &#39;zone/tz/2018c.
 1.0/zoneinfo/America/Chicago&#39;</code></pre>
-<p><strong>Last updated:</strong> 2018-05-23</p>
+<p><strong>Last updated:</strong> 2018-06-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 6d67897</p>
+<p><strong>Code version:</strong> 867e392</p>
+<hr />
 <div id="background-and-summary" class="section level2">
 <h2>Background and summary</h2>
+<p>Examine the GOM membership probability of the samples that are outliers on the PC1 vs PC2 plot.</p>
 <hr />
 </div>
 <div id="analysis" class="section level2">
@@ -336,12 +338,8 @@ library(metagenomeSeq)
 library(matrixStats)</code></pre>
 <p>Load PCA</p>
 <pre class="r"><code>obj &lt;- readRDS(&quot;../data/nasal_GOM.rds&quot;)</code></pre>
-<p>Load previously computed results.</p>
-<pre class="r"><code>fits &lt;- readRDS(file = &quot;../data/gomfits.rds&quot;)</code></pre>
-<p>Extract sampel cluster membership.</p>
-<pre class="r"><code>membership &lt;- lapply(fits, function(xx) {
-     apply(xx$omega, 1, which.max)
-  })</code></pre>
+<p>Load previously computed results for k=2.</p>
+<pre class="r"><code>fits &lt;- readRDS(file = &quot;../data/count-clust.rds&quot;)</code></pre>
 <p>Get PCA results</p>
 <pre class="r"><code>pcaRES &lt;- function(obj,tran=TRUE,comp=1:2,norm=TRUE,log=TRUE,usePCA=TRUE,useDist=FALSE,distfun=stats::dist,dist.method=&quot;euclidian&quot;,n=NULL,...){
   mat = returnAppropriateObj(obj,norm,log)
@@ -413,22 +411,22 @@ FALSE  TRUE
   TRUE    0   7</code></pre>
 <pre class="r"><code>cbind(pdata$gom_prob_group1[which(pdata$pc_outlier==1)], pdata$gom_prob_group2[which(pdata$pc_outlier==1)])</code></pre>
 <pre><code>             [,1]      [,2]
-[1,] 2.096600e-02 0.9790340
-[2,] 8.257363e-06 0.9999917
-[3,] 2.315907e-01 0.7684093
-[4,] 3.204828e-01 0.6795172
-[5,] 3.173898e-01 0.6826102
-[6,] 3.573184e-02 0.9642682
-[7,] 3.655020e-02 0.9634498</code></pre>
+[1,] 0.0273438612 0.9726561
+[2,] 0.0001033176 0.9998967
+[3,] 0.2372200486 0.7627800
+[4,] 0.3211409734 0.6788590
+[5,] 0.3253818129 0.6746182
+[6,] 0.0785997584 0.9214002
+[7,] 0.0233961031 0.9766039</code></pre>
 <ul>
 <li>Are their borderline probablities at all?</li>
 </ul>
 <pre class="r"><code>summary(pdata$gom_prob_group2[pdata$GOM==2 &amp; pdata$pc_outlier==0])</code></pre>
-<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-0.0000173 0.0394671 0.1271493 0.3033318 0.5900155 0.9433782 </code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.5175  0.6140  0.6835  0.7184  0.8221  0.9998 </code></pre>
 <pre class="r"><code>summary(pdata$gom_prob_group2[pdata$GOM==2 &amp; pdata$pc_outlier==1])</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.6795  0.7255  0.9634  0.8625  0.9717  1.0000 </code></pre>
+ 0.6746  0.7208  0.9214  0.8553  0.9746  0.9999 </code></pre>
 <p>The non-outliers in Group 2 are more similar to Group 1.</p>
 <pre class="r"><code>library(CountClust)
 newgroup &lt;- pdata$GOM
@@ -449,11 +447,14 @@ StructureGGplot(omega = omega,
                                  axis_ticks_lwd_x = .1,
                                  axis_label_size = 7,
                                  axis_label_face = &quot;bold&quot;))</code></pre>
-<p><img src="figure/explore-cluster-probability-.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/explore-cluster-probability-.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Save outlier info.</p>
-<pre class="r"><code>write.table(data.frame(rownames(pdata),newgroup)[order(newgroup, decreasing = T),],
-            col.names = F, row.names = F, quote = F,
-            file = &quot;../output/explore-cluster-probability.Rmd/outlier.list&quot;)</code></pre>
+<pre class="r"><code>write.table(data.frame(sample_ID=rownames(pdata),
+                       gom_prob_group1=pdata$gom_prob_group1,
+                       gom_prob_group2=pdata$gom_prob_group2,
+                       newgroup)[order(newgroup, decreasing = T),],
+            col.names = T, row.names = F, quote = F,
+            file = &quot;../output/explore-cluster-probability.Rmd/outlier.list.txt&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
