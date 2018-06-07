@@ -27,7 +27,11 @@ knitr::read_chunk("chunks.R")
 knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 ```
 
+---
+
 ## Background and summary
+
+Examine the GOM membership probability of the samples that are outliers on the PC1 vs PC2 plot.
 
 
 ---
@@ -46,18 +50,10 @@ Load PCA
 obj <- readRDS("../data/nasal_GOM.rds")
 ```
 
-Load previously computed results.
+Load previously computed results for k=2.
 
 ```{r}
-fits <- readRDS(file = "../data/gomfits.rds")
-```
-
-Extract sampel cluster membership.
-
-```{r}
-membership <- lapply(fits, function(xx) {
-     apply(xx$omega, 1, which.max)
-  })
+fits <- readRDS(file = "../data/count-clust.rds")
 ```
 
 Get PCA results
@@ -136,7 +132,6 @@ table(pdata$pc_outlier)
 table(pdata$pc_outlier, pdata$GOM)
 
 cbind(pdata$gom_prob_group1[which(pdata$pc_outlier==1)], pdata$gom_prob_group2[which(pdata$pc_outlier==1)])
-
 ```
 
 * Are their borderline probablities at all?
@@ -173,9 +168,12 @@ StructureGGplot(omega = omega,
 Save outlier info.
 
 ```{r, eval = F}
-write.table(data.frame(rownames(pdata),newgroup)[order(newgroup, decreasing = T),],
-            col.names = F, row.names = F, quote = F,
-            file = "../output/explore-cluster-probability.Rmd/outlier.list")
+write.table(data.frame(sample_ID=rownames(pdata),
+                       gom_prob_group1=pdata$gom_prob_group1,
+                       gom_prob_group2=pdata$gom_prob_group2,
+                       newgroup)[order(newgroup, decreasing = T),],
+            col.names = T, row.names = F, quote = F,
+            file = "../output/explore-cluster-probability.Rmd/outlier.list.txt")
 ```
 
 
