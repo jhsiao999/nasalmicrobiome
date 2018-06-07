@@ -18,7 +18,8 @@ Share results of nasal microbiome project.
 * Cluster characteristics
     * [Stacked bar plot of abundance](stacked_bar_plots.html)
     * [Diversity](cluster-diversity.Rmd)
-
+    * [Explore sample cluster probabilities in relation to the PCA outliers](explore-cluster-probability.html)
+    
 * Differential abudance analysis
     * [Compare two clusters](differential_abundance.html)
 
