@@ -33,12 +33,13 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 
 Motivation: when running `CountClut`, sample cluster assignment may differ between different random seeds, despite similar cluster characteristics in feature abundancce. This issue is not unique to `CountClust`. In model-based unsupervised clustering methods, the parameter space is usually complex, and as a result, difficult to find global maximum of the model likelihood. 
 
-Here I run `CountClust` under 100 different random seeds. I compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent `CountClust` analysis. 
+I run `CountClust` under 100 different random seeds and then compare Bayes Factors across different random seeds and sample cluster membership. I will use the random seed that generates the largest Bayes Factor in all subsequent `CountClust` analysis. 
 
-Across these 100 random seeds `409` produced the largest BF and is thus chosen as our random seed. This chosen random seed (best seed) is then used in our final results (https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html). 
+This document shows the analysis steps for when K=2. Results show that for when K=2, across 100 random seeds `409` produced the largest BF and is thus chosen as our random seed. This chosen random seed (best seed) is then used in our final results (https://jhsiao999.github.io/nasalmicrobiome/step3_gradesOfMembership.html). 
+
+The fitting results for K=2 to 5 under the same 100 random seeds are saved in `output/gom-seeds-k-2.rds`, `output/gom-seeds-k-3.rds`, `output/gom-seeds-k-4.rds`, and `output/gom-seeds-k-5.rds`.
 
 
-$~$
 
 ---
 
@@ -62,11 +63,12 @@ MRobj = readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
 MRobj
 ```
 
-$~$
 
 ---
 
-## 100 random seeds
+## K=2 
+
+100 random seeds
 
 Apply `CountClust` to fit grades of membership model. 
 
@@ -112,8 +114,6 @@ saveRDS(res[[19]], file = "../output/gom-seeds.Rmd/res_best_seed_67.rds")
 
 $~$
 
-## Best seeds
-
 Results using the seed with the highest BF.
 
 ```{r, eval=T}
@@ -127,7 +127,43 @@ table(cluster)
 kable(res_best$omega)
 ```
 
-$~$
+
+---
+
+## K=3 to 5
+
+Code in `code/gom-seeds.R`.
+
+```{r}
+clust_2 <- readRDS("../output/gom-seeds-k-2.rds")
+clust_3 <- readRDS("../output/gom-seeds-k-3.rds")
+clust_4 <- readRDS("../output/gom-seeds-k-4.rds")
+clust_5 <- readRDS("../output/gom-seeds-k-5.rds")
+```
+
+Identify the best seed.
+
+K=2: 67; K=3: 67, K=4: 59; K=5: 307.
+
+```{r}
+seeds[which.max(lapply(clust_2, "[[", 4))]
+seeds[which.max(lapply(clust_3, "[[", 4))]
+seeds[which.max(lapply(clust_4, "[[", 4))]
+seeds[which.max(lapply(clust_5, "[[", 4))]
+```
+
+save the best seeds.
+
+```{r, eval =F}
+saveRDS(clust_2[which.max(lapply(clust_2, "[[", 4))],
+        "../output/gom-k2-best-seed-67.rds")
+saveRDS(clust_3[which.max(lapply(clust_3, "[[", 4))],
+        "../output/gom-k3-best-seed-67.rds")
+saveRDS(clust_4[which.max(lapply(clust_4, "[[", 4))],
+        "../output/gom-k4-best-seed-59.rds")
+saveRDS(clust_5[which.max(lapply(clust_5, "[[", 4))],
+        "../output/gom-k5-best-seed-307.rds")
+```
 
 ---
 
