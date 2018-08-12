@@ -69,6 +69,15 @@ membership <- lapply(fits, function(xx) {
 names(membership) <- c("clust_2", "clust_3", "clust_4", "clust_5")
 ```
 
+Number of samples per cluster
+
+```{r}
+table(membership$clust_2)
+table(membership$clust_3)
+table(membership$clust_4)
+table(membership$clust_5)
+```
+
 Compute variance explained.
 
 ```{r, eval = FALSE}
