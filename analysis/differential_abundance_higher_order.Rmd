@@ -1,0 +1,207 @@
+---
+title: "Differential abundance analysis at higher taxa levels"
+author: "JNP"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+#knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+
+## Loading data and packages
+
+```{r}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(metagenomeSeq)
+library(CountClust)
+```
+
+Read in filtered, corrected, etc data.
+
+```{r, eval=F}
+load("../data/nasal_GOM.rdata")
+colnames(fData(MRobj))
+```
+
+---
+
+## aggregateByTaxonomy code edits
+
+```{r, eval=F}
+aggregateByTaxonomy <- function (obj, lvl, alternate = FALSE, norm = FALSE, log = FALSE, 
+    aggfun = colSums, sl = 1000, featureOrder = NULL, returnFullHierarchy = TRUE, 
+    out = "MRexperiment") 
+{
+    if (class(obj) == "MRexperiment") {
+        mat = MRcounts(obj, norm = norm, log = log, sl = sl)
+        if (length(lvl) == 1) {
+            # added code
+            include_features <- fData(obj)[match(rownames(mat),fData(obj)$Species),]
+            levels=as.character(include_features[, lvl])
+            #            levels = as.character(fData(obj)[, lvl])
+        } else { levels = as.character(lvl) }
+    }
+    else {
+        mat = obj
+        levels = as.character(lvl)
+        if (length(levels) != nrow(mat)) 
+            stop("If input is a count matrix, lvl must be a vector of length = nrow(count matrix)")
+    }
+    if (!(out %in% c("MRexperiment", "matrix"))) {
+        stop("The variable out must either be 'MRexperiment' or 'matrix'")
+    }
+    nafeatures = is.na(levels)
+    if (length(nafeatures) > 0) {
+        if (alternate == FALSE) {
+            levels[nafeatures] = "no_match"
+        }
+        else {
+            levels[nafeatures] = paste("OTU_", rownames(obj)[nafeatures], 
+                sep = "")
+        }
+    }
+    grps = split(seq_along(levels), levels)
+    newMat = array(NA, dim = c(length(grps), ncol(obj)))
+    for (i in seq_along(grps)) {
+        newMat[i, ] = aggfun(mat[grps[[i]], , drop = FALSE])
+    }
+    rownames(newMat) = names(grps)
+    colnames(newMat) = colnames(obj)
+    if (out == "matrix") 
+        return(newMat)
+    if (out == "MRexperiment") {
+        if (returnFullHierarchy) {
+            if (is.null(featureOrder)) {
+                featureOrder <- colnames(fData(obj))
+            }
+            taxa = featureData(obj)[match(names(grps), fData(obj)[, 
+                lvl]), featureOrder[1:which(featureOrder == lvl)]]
+            featureNames(taxa) = names(grps)
+        }
+        else {
+            taxa = data.frame(names(grps))
+            colnames(taxa) = "Taxa"
+            rownames(taxa) = names(grps)
+            taxa = as(taxa, "AnnotatedDataFrame")
+        }
+        if (class(obj) == "MRexperiment") {
+            pd = phenoData(obj)
+            newObj = newMRexperiment(newMat, featureData = taxa, 
+                phenoData = pd)
+        }
+        else {
+            newObj = newMRexperiment(newMat, featureData = taxa)
+        }
+        return(newObj)
+    }
+}
+```
+
+## Analysis at genus level
+
+```{r, eval=F}
+cl = pData(MRobj)$GOM
+mod = model.matrix(~cl)
+
+obj <- aggregateByTaxonomy(MRobj, lvl="Genus", aggfun=colSums)
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+fit <- fitFeatureModel(obj, mod=mod)
+MRfulltable(fit,number = nrow(obj),file="../data/tbl_genus.tsv")
+dim(obj)
+```
+
+--
+
+
+## Analysis at family level
+
+```{r, eval=F}
+cl = pData(MRobj)$GOM
+mod = model.matrix(~cl)
+
+obj <- aggregateByTaxonomy(MRobj, lvl="Family", aggfun=colSums)
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+fit <- fitFeatureModel(obj, mod=mod)
+MRfulltable(fit,number = nrow(obj),file="../data/tbl_family.tsv")
+dim(obj)
+```
+
+---
+
+
+## Analysis at order level
+
+```{r, eval=F}
+cl = pData(MRobj)$GOM
+mod = model.matrix(~cl)
+
+obj <- aggregateByTaxonomy(MRobj, lvl="Order", aggfun=colSums)
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+fit <- fitFeatureModel(obj, mod=mod)
+MRfulltable(fit,number = nrow(obj),file="../data/tbl_order.tsv")
+dim(obj)
+```
+
+
+## Analysis at class level
+
+```{r, eval=F}
+cl = pData(MRobj)$GOM
+mod = model.matrix(~cl)
+
+obj <- aggregateByTaxonomy(MRobj, lvl="Class", aggfun=colSums)
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+fit <- fitFeatureModel(obj, mod=mod)
+MRfulltable(fit,number = nrow(obj),file="../data/tbl_class.tsv")
+dim(obj)
+```
+
+
+---
+
+
+## Analysis at phylum level
+
+```{r, eval=F}
+cl = pData(MRobj)$GOM
+mod = model.matrix(~cl)
+
+obj <- aggregateByTaxonomy(MRobj, lvl="Phylum", aggfun=colSums)
+obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
+fit <- fitFeatureModel(obj, mod=mod)
+MRfulltable(fit,number = nrow(obj),file="../data/tbl_phylum.tsv")
+dim(obj)
+```
+
+
+---
+
+## Session Info
+
+```{r, echo = F}
+sessionInfo()
+```
