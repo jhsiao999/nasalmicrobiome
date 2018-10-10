@@ -20,8 +20,9 @@ Share results of nasal microbiome project.
     * [Diversity](cluster-diversity.Rmd)
     * [Explore sample cluster probabilities in relation to the PCA outliers](explore-cluster-probability-.html)
     
-* Differential abudance analysis
-    * [Compare two clusters](differential_abundance.html)
+* Differential abudance analysis between two clusters
+    * [At the species level](differential_abundance.html)
+    * [At higher phylogenetic taxa level](differential_abundance_higher_order.html)
 
 ---
 
