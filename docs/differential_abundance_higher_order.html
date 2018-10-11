@@ -415,6 +415,10 @@ colnames(fData(MRobj))</code></pre>
 mod = model.matrix(~cl)
 
 obj &lt;- aggregateByTaxonomy(MRobj, lvl=&quot;Genus&quot;, aggfun=colSums)
+
+# export aggregated count table
+# write.xlsx(MRcounts(obj), file=&quot;../data/counts_genus.xlsx&quot;,
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
 obj@expSummary$expSummary$normFactors &lt;- normFactors(MRobj)
 fit &lt;- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file=&quot;../data/tbl_genus.tsv&quot;)
@@ -427,6 +431,9 @@ dim(obj)</code></pre>
 mod = model.matrix(~cl)
 
 obj &lt;- aggregateByTaxonomy(MRobj, lvl=&quot;Family&quot;, aggfun=colSums)
+# # export aggregated count table
+# write.xlsx(MRcounts(obj), file=&quot;../data/counts_family.xlsx&quot;,
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
 obj@expSummary$expSummary$normFactors &lt;- normFactors(MRobj)
 fit &lt;- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file=&quot;../data/tbl_family.tsv&quot;)
@@ -439,6 +446,10 @@ dim(obj)</code></pre>
 mod = model.matrix(~cl)
 
 obj &lt;- aggregateByTaxonomy(MRobj, lvl=&quot;Order&quot;, aggfun=colSums)
+# # export aggregated count table
+# write.xlsx(MRcounts(obj), file=&quot;../data/counts_order.xlsx&quot;,
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
+
 obj@expSummary$expSummary$normFactors &lt;- normFactors(MRobj)
 fit &lt;- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file=&quot;../data/tbl_order.tsv&quot;)
@@ -450,6 +461,10 @@ dim(obj)</code></pre>
 mod = model.matrix(~cl)
 
 obj &lt;- aggregateByTaxonomy(MRobj, lvl=&quot;Class&quot;, aggfun=colSums)
+# # export aggregated count table
+# write.xlsx(MRcounts(obj), file=&quot;../data/counts_class.xlsx&quot;,
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
+
 obj@expSummary$expSummary$normFactors &lt;- normFactors(MRobj)
 fit &lt;- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file=&quot;../data/tbl_class.tsv&quot;)
@@ -502,7 +517,7 @@ dim(obj)</code></pre>
 ## [19] pkgconfig_2.0.2    purrr_0.2.5        scales_1.0.0      
 ## [22] gdata_2.18.0       tibble_1.4.2       mgcv_1.8-24       
 ## [25] withr_2.1.2        nnet_7.3-12        lazyeval_0.2.1    
-## [28] magrittr_1.5       crayon_1.3.4       evaluate_0.10.1   
+## [28] magrittr_1.5       crayon_1.3.4       evaluate_0.12     
 ## [31] MASS_7.3-50        nlme_3.1-137       gplots_3.0.1      
 ## [34] xml2_1.2.0         vegan_2.5-2        tools_3.4.1       
 ## [37] hms_0.4.2          matrixStats_0.54.0 stringr_1.3.1     

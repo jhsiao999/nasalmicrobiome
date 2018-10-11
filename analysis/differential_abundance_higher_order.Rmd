@@ -128,10 +128,15 @@ cl = pData(MRobj)$GOM
 mod = model.matrix(~cl)
 
 obj <- aggregateByTaxonomy(MRobj, lvl="Genus", aggfun=colSums)
+
+# export aggregated count table
+# write.xlsx(MRcounts(obj), file="../data/counts_genus.xlsx",
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
 obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
 fit <- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file="../data/tbl_genus.tsv")
 dim(obj)
+
 ```
 
 --
@@ -144,6 +149,9 @@ cl = pData(MRobj)$GOM
 mod = model.matrix(~cl)
 
 obj <- aggregateByTaxonomy(MRobj, lvl="Family", aggfun=colSums)
+# # export aggregated count table
+# write.xlsx(MRcounts(obj), file="../data/counts_family.xlsx",
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
 obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
 fit <- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file="../data/tbl_family.tsv")
@@ -160,6 +168,10 @@ cl = pData(MRobj)$GOM
 mod = model.matrix(~cl)
 
 obj <- aggregateByTaxonomy(MRobj, lvl="Order", aggfun=colSums)
+# # export aggregated count table
+# write.xlsx(MRcounts(obj), file="../data/counts_order.xlsx",
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
+
 obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
 fit <- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file="../data/tbl_order.tsv")
@@ -174,6 +186,10 @@ cl = pData(MRobj)$GOM
 mod = model.matrix(~cl)
 
 obj <- aggregateByTaxonomy(MRobj, lvl="Class", aggfun=colSums)
+# # export aggregated count table
+# write.xlsx(MRcounts(obj), file="../data/counts_class.xlsx",
+#            col.names=TRUE, row.names=TRUE, append=FALSE, showNA=TRUE, password=NULL)
+
 obj@expSummary$expSummary$normFactors <- normFactors(MRobj)
 fit <- fitFeatureModel(obj, mod=mod)
 MRfulltable(fit,number = nrow(obj),file="../data/tbl_class.tsv")
