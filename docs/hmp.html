@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Applying GoM to HMP data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">nasalmicrobiome</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jhsiao999/nasalmicrobiome">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Applying GoM to HMP data</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<hr />
+<div id="objectives" class="section level2">
+<h2>Objectives</h2>
+<ul>
+<li><p>Applying GoM to HMP data.</p></li>
+<li><p>Compare K=2-5 GoM profile and Taxa profile with that in our data.</p></li>
+</ul>
+<hr />
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<ul>
+<li><p>Run GoM on HMP anterio nares data 389 samples and 14,785 OTUs. After filtering (for features and samples), we have 1,506 OTUs OTUs and 370 samples.</p></li>
+<li><p>Read count corrected for sequencing run center at the Species level.</p></li>
+<li><p>Run K=2-5.</p></li>
+</ul>
+<hr />
+</div>
+<div id="hmp-data-analysis" class="section level2">
+<h2>HMP data analysis</h2>
+<ul>
+<li><p>Data curated by JNP.</p></li>
+<li><p>Analyzed 389 samples collecetd from “anterior nares”.</p></li>
+<li><p>Run center is known to be associated with batch effects.</p></li>
+</ul>
+<div id="filtering" class="section level3">
+<h3>Filtering</h3>
+<pre class="r"><code>library(metagenomeSeq)
+library(CountClust)</code></pre>
+<pre class="r"><code>library(metagenomeSeq)
+load(&quot;../data/hmp.rdata&quot;)
+
+MRobj &lt;- hmp[,pData(hmp)$HMPbodysupersite == &quot;Airways&quot;]
+
+# filtering
+MRobj_count &lt;- MRcounts(MRobj, norm=F, log=F)
+
+# keep features present (&gt;0 read) in at least 1% of the samples
+keep_rowmeans &lt;- rowSums(MRobj_count &gt; 0) &gt;= ncol(MRobj_count)*.01
+
+# keep features &gt; 5 read in at least one sample
+summary(c(MRobj_count))
+keep_reads &lt;- rowSums(MRobj_count &gt; 5) &gt; 0
+
+keep_features &lt;- keep_rowmeans | keep_reads
+
+# filtering data
+MRobj_filtered &lt;- MRobj[keep_features,]
+
+# filter sample
+keep_sample &lt;- colMeans(MRcounts(MRobj_filtered)&gt;0) &gt; .01
+MRobj_filtered &lt;- MRobj_filtered[,keep_sample]
+
+dim(MRobj_filtered)</code></pre>
+</div>
+<div id="batch-correction" class="section level3">
+<h3>Batch correction</h3>
+<pre class="r"><code>obj &lt;- aggTax(MRobj_filtered,lvl=&quot;species&quot;)
+obj@expSummary$expSummary$normFactors &lt;- normFactors(MRobj_filtered)
+
+counts &lt;- t(MRcounts(obj,norm=FALSE,log=FALSE))
+batchcorrect_counts &lt;- BatchCorrectedCounts(counts,
+                                         batch_lab = factor(pData(MRobj_filtered)$RUNCENTER),
+                                         use_parallel=FALSE)
+counts = t(batchcorrect_counts)
+
+assayData(obj)[[&quot;counts&quot;]] = counts
+#obj</code></pre>
+<p>Output filtered, normalized, batch-corrected counts.</p>
+<pre class="r"><code>saveRDS(obj, file=&quot;../data/hmp_processed.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="gom-clustering" class="section level3">
+<h3>GoM clustering</h3>
+<p>Try 100 random seeds.</p>
+<pre class="r"><code>obj &lt;- readRDS(file=&quot;../data/hmp_processed.rds&quot;)
+
+library(CountClust)
+
+
+# fit GoM
+MRobj_species &lt;- aggTax(obj,lvl=&quot;species&quot;)
+counts &lt;- MRcounts(MRobj_species,norm=FALSE,log=FALSE)
+clust_2 &lt;- FitGoM(t(counts), K=c(2), tol=0.00001, num_trials = 100)
+clust_3 &lt;- FitGoM(t(counts), K=c(3), tol=0.00001, num_trials = 100)
+clust_4 &lt;- FitGoM(t(counts), K=c(4), tol=0.00001, num_trials = 100)
+clust_5 &lt;- FitGoM(t(counts), K=c(5), tol=0.00001, num_trials = 100)
+# clust_6 &lt;- FitGoM(t(counts), K=c(6), tol=0.00001, num_trials = 100)
+# clust_7 &lt;- FitGoM(t(counts), K=c(7), tol=0.00001, num_trials = 100)
+# clust_8 &lt;- FitGoM(t(counts), K=c(8), tol=0.00001, num_trials = 100)
+# clust_9 &lt;- FitGoM(t(counts), K=c(9), tol=0.00001, num_trials = 100)
+# clust_10 &lt;- FitGoM(t(counts), K=c(10), tol=0.00001, num_trials = 100)
+
+fits &lt;- list(clust_2$fit, clust_3$fit, clust_4$fit, clust_5$fit)
+membership &lt;- lapply(fits, function(xx) {
+     apply(xx$omega, 1, which.max)
+  })
+names(membership) &lt;- paste0(&quot;clust_&quot;, c(2:5))
+
+saveRDS(fits, file = &quot;../output/hmp.Rmd/hmp_clusters.rds&quot;)
+saveRDS(membership, file = &quot;../output/hmp.Rmd/hmp_clusters_membership.rds&quot;)</code></pre>
+<p>GoM results</p>
+<pre class="r"><code>fits &lt;- readRDS(&quot;../output/hmp.Rmd/hmp_clusters.rds&quot;)
+membership &lt;- readRDS(&quot;../output/hmp.Rmd/hmp_clusters_membership.rds&quot;)
+# log bayes keeps increasing
+plot(y=sapply(fits, function(x) x$BF),
+     x=as.integer(c(2:5), pch=16),
+     ylab=&quot;log Bayes Factor&quot;, axes = F, xlab=&quot;Clusters&quot;)
+axis(1, at=c(1:6))
+axis(2)</code></pre>
+<p><img src="hmp_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>table(membership$clust_2)</code></pre>
+<pre><code>## 
+##   1   2 
+## 280  90</code></pre>
+<pre class="r"><code>table(membership$clust_3)</code></pre>
+<pre><code>## 
+##   1   2   3 
+## 292  61  17</code></pre>
+<pre class="r"><code>table(membership$clust_4)</code></pre>
+<pre><code>## 
+##   1   2   3   4 
+## 292  61  12   5</code></pre>
+<pre class="r"><code>table(membership$clust_5)</code></pre>
+<pre><code>## 
+##   1   2   3   4   5 
+## 291  65   8   3   3</code></pre>
+<pre class="r"><code>fits &lt;- readRDS(&quot;../output/hmp.Rmd/hmp_clusters.rds&quot;)
+membership &lt;- readRDS(&quot;../output/hmp.Rmd/hmp_clusters_membership.rds&quot;)
+
+pdf(&quot;../output/hmp.Rmd/hmp_clusts_structure.pdf&quot;)
+for (i in 1:length(fits)) {
+  annotation &lt;- data.frame(
+  sample_id = paste0(&quot;X&quot;, c(1:NROW(fits[[i]]$omega))),
+  tissue_label = factor(membership[[i]],
+                        levels = as.character(1:(i+1)) ) ) 
+  rownames(fits[[i]]$omega) &lt;- annotation$sample_id
+  print(StructureGGplot(omega = fits[[i]]$omega,
+                  annotation = annotation,
+                  palette = RColorBrewer::brewer.pal(i+1, &quot;Accent&quot;),
+                  yaxis_label = &quot;Group&quot;,
+                  order_sample = TRUE,
+                  axis_tick = list(axis_ticks_length = .1,
+                                   axis_ticks_lwd_y = .1,
+                                   axis_ticks_lwd_x = .1,
+                                   axis_label_size = 7,
+                                   axis_label_face = &quot;bold&quot;)) )
+}
+dev.off()</code></pre>
+<pre><code>## quartz_off_screen 
+##                 2</code></pre>
+<p>Taxonomical profile</p>
+<pre class="r"><code>library(reshape2)
+
+obj &lt;- readRDS(file=&quot;../data/hmp_processed.rds&quot;)
+
+# code from code/figs-paulson-04212018.R
+pdf(&quot;../output/hmp.Rmd/hmp_clusts_taxa.pdf&quot;)
+
+pp &lt;- plotBar(obj,lvl=&#39;genus&#39;,cl=membership$clust_2,n=20)
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+cols &lt;- getPalette(21)
+plotBar.aggregate(obj[,order(colnames(obj))],lvl=&#39;genus&#39;,n=20,
+                  plot.factor_levels = levels(pp$dd$variable))$p +
+  scale_fill_manual(values = cols) + xlab(&#39;Samples&#39;) +
+  guides(fill=guide_legend(ncol=1))
+
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(obj,lvl=&#39;genus&#39;,cl=membership$clust_2,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+  
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(obj,lvl=&#39;genus&#39;,cl=membership$clust_3,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(obj,lvl=&#39;genus&#39;,cl=membership$clust_4,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(obj,lvl=&#39;genus&#39;,cl=membership$clust_5,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+  
+dev.off()</code></pre>
+<hr />
+</div>
+</div>
+<div id="current-data" class="section level2">
+<h2>Current data</h2>
+<p>See <a href="step3_gradesOfMembership.html">Grades of membership model finalized</a> for the results.</p>
+<pre class="r"><code>counts_clust &lt;- readRDS(file = &quot;../data/count-clust.rds&quot;)
+
+
+MRobj = readRDS(&quot;../data/nasal_filtered_normed_batchcorrected.rds&quot;)
+counts &lt;- MRcounts(MRobj,norm=FALSE,log=FALSE)
+nasal_clust3 &lt;- FitGoM(t(counts), K=c(3), tol=0.00001, num_trials = 100)
+nasal_clust4 &lt;- FitGoM(t(counts), K=c(4), tol=0.00001, num_trials = 100)
+nasal_clust5 &lt;- FitGoM(t(counts), K=c(5), tol=0.00001, num_trials = 100)
+
+
+fits &lt;- list(counts_clust$clust_2, nasal_clust3$fit, nasal_clust4$fit, nasal_clust5$fit)
+membership &lt;- lapply(fits, function(xx) {
+     apply(xx$omega, 1, which.max)
+  })
+names(membership) &lt;- c(&quot;clust_2&quot;, &quot;clust_3&quot;, &quot;clust_4&quot;, &quot;clust_5&quot;)
+
+saveRDS(fits, file = &quot;../output/hmp.Rmd/nasal_clust.rds&quot;)
+saveRDS(membership, file = &quot;../output/hmp.Rmd/nasal_clust_membership.rds&quot;)</code></pre>
+<pre class="r"><code>fits &lt;- readRDS(&quot;../output/hmp.Rmd/nasal_clust.rds&quot;)
+membership &lt;- readRDS(&quot;../output/hmp.Rmd/nasal_clust_membership.rds&quot;)
+table(membership$clust_2)</code></pre>
+<pre><code>## 
+##   1   2 
+## 167  30</code></pre>
+<pre class="r"><code>table(membership$clust_3)</code></pre>
+<pre><code>## 
+##   1   2   3 
+## 115  69  13</code></pre>
+<pre class="r"><code>table(membership$clust_4)</code></pre>
+<pre><code>## 
+##   1   2   3   4 
+## 115  67  11   4</code></pre>
+<pre class="r"><code>table(membership$clust_5)</code></pre>
+<pre><code>## 
+##   1   2   3   4   5 
+## 112  68   8   6   3</code></pre>
+<pre class="r"><code>pdf(&quot;../output/hmp.Rmd/nasal_clusts_structure.pdf&quot;)
+for (i in 1:length(fits)) {
+  annotation &lt;- data.frame(
+  sample_id = paste0(&quot;X&quot;, c(1:NROW(fits[[i]]$omega))),
+  tissue_label = factor(membership[[i]],
+                        levels = as.character(1:(i+1)) ) ) 
+  rownames(fits[[i]]$omega) &lt;- annotation$sample_id
+  print(StructureGGplot(omega = fits[[i]]$omega,
+                  annotation = annotation,
+                  palette = RColorBrewer::brewer.pal(i+1, &quot;Accent&quot;),
+                  yaxis_label = &quot;Group&quot;,
+                  order_sample = TRUE,
+                  axis_tick = list(axis_ticks_length = .1,
+                                   axis_ticks_lwd_y = .1,
+                                   axis_ticks_lwd_x = .1,
+                                   axis_label_size = 7,
+                                   axis_label_face = &quot;bold&quot;)) )
+}
+dev.off()</code></pre>
+<pre><code>## quartz_off_screen 
+##                 2</code></pre>
+<p>nasal analysis</p>
+<pre class="r"><code>MRobj = readRDS(&quot;../data/nasal_filtered_normed_batchcorrected.rds&quot;)
+membership &lt;- readRDS(&quot;../output/hmp.Rmd/nasal_clust_membership.rds&quot;)
+
+pdf(&quot;../output/hmp.Rmd/nasal_clusts_taxa.pdf&quot;, width=10)
+
+# get factor levels
+pp &lt;- plotBar.aggregate(MRobj[,order(colnames(MRobj))],lvl=&#39;Genus&#39;,n=20,
+                  plot.factor_levels = levels(pp$dd$variable))
+labs &lt;- c(levels(pp$dd$variable)[-which(levels(pp$dd$variable)==&quot;Other&quot;)], &quot;Other&quot;)
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+cols &lt;- getPalette(21)
+plotBar.aggregate(MRobj[,order(colnames(MRobj))],lvl=&#39;Genus&#39;,n=20,
+                  plot.factor_levels = labs)$p +
+  scale_fill_manual(values = cols) + xlab(&#39;Samples&#39;) +
+#  theme(legend.text=element_text(size=7)) +
+  guides(fill=guide_legend(ncol=1))
+
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(MRobj,lvl=&#39;Genus&#39;,cl=membership$clust_2,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+
+  
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(MRobj,lvl=&#39;Genus&#39;,cl=membership$clust_3,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+  
+
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(MRobj,lvl=&#39;Genus&#39;,cl=membership$clust_4,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+  
+getPalette = colorRampPalette(brewer.pal(9, &quot;Set1&quot;))
+plotBar(MRobj,lvl=&#39;Genus&#39;,cl=membership$clust_5,n=20)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1))
+
+dev.off()</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.4.1 (2017-06-30)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS High Sierra 10.13
+## 
+## Matrix products: default
+## BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] parallel  stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
+## 
+## other attached packages:
+##  [1] CountClust_1.6.2     ggplot2_3.1.0        metagenomeSeq_1.21.1
+##  [4] RColorBrewer_1.1-2   glmnet_2.0-16        foreach_1.4.4       
+##  [7] Matrix_1.2-15        limma_3.34.9         Biobase_2.38.0      
+## [10] BiocGenerics_0.24.0 
+## 
+## loaded via a namespace (and not attached):
+##  [1] maptpx_1.9-5       Rcpp_1.0.0         ape_5.2           
+##  [4] lattice_0.20-38    gtools_3.8.1       assertthat_0.2.0  
+##  [7] rprojroot_1.3-2    digest_0.6.18      slam_0.1-43       
+## [10] R6_2.3.0           plyr_1.8.4         backports_1.1.2   
+## [13] stats4_3.4.1       evaluate_0.12      pillar_1.3.0      
+## [16] gplots_3.0.1       rlang_0.3.0.1      lazyeval_0.2.1    
+## [19] gdata_2.18.0       vegan_2.5-3        rmarkdown_1.10    
+## [22] Rtsne_0.15         stringr_1.3.1      munsell_0.5.0     
+## [25] compiler_3.4.1     pkgconfig_2.0.2    SQUAREM_2017.10-1 
+## [28] mgcv_1.8-25        htmltools_0.3.6    nnet_7.3-12       
+## [31] tidyselect_0.2.5   tibble_1.4.2       codetools_0.2-15  
+## [34] matrixStats_0.54.0 mapplots_1.5.1     permute_0.9-4     
+## [37] crayon_1.3.4       dplyr_0.7.8        withr_2.1.2       
+## [40] MASS_7.3-51.1      bitops_1.0-6       grid_3.4.1        
+## [43] nlme_3.1-137       gtable_0.2.0       magrittr_1.5      
+## [46] scales_1.0.0       KernSmooth_2.23-15 stringi_1.2.4     
+## [49] reshape2_1.4.3     flexmix_2.3-14     bindrcpp_0.2.2    
+## [52] boot_1.3-20        cowplot_0.9.3      iterators_1.0.10  
+## [55] tools_3.4.1        picante_1.7        glue_1.3.0        
+## [58] purrr_0.2.5        yaml_2.2.0         colorspace_1.3-2  
+## [61] cluster_2.0.7-1    caTools_1.17.1.1   knitr_1.20        
+## [64] bindr_0.1.1        modeltools_0.2-22</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
