@@ -24,6 +24,8 @@ Share results of nasal microbiome project.
     * [At the species level](differential_abundance.html)
     * [At higher phylogenetic taxa level](differential_abundance_higher_order.html)
 
+* [Applying GoM to HMP data](hmp.html)
+
 ---
 
 * Shiny site for our exploratory data analysis
