@@ -11,3 +11,5 @@ analysis/*_cache
 data/
 output/
 output-manuscript/
+
+*pptx
