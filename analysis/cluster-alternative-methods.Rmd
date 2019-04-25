@@ -1,0 +1,138 @@
+---
+title: "Applying GoM to HMP data"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+#knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+---
+
+## Summary
+
+* Apply non-model-based approaches to cluster samples
+
+
+---
+
+## Hierarchical clustering
+
+On logged and normed counts. Complete and average distance give the same results. 
+
+```{r}
+library(metagenomeSeq)
+MRobj <- readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
+counts_logged <- MRcounts(MRobj,norm=T,log=T)
+colnames(counts_logged) <- colnames(MRobj)
+
+obj <- readRDS("../data/nasal_GOM.rds")
+pdata <- pData(obj)
+
+dist_mat <- dist(t(counts_logged), method="euclidean")
+hclust_avg <- hclust(dist_mat, method = 'average')
+cut_avg_1 <- cutree(hclust_avg, k = 2)
+plot(hclust_avg)
+rect.hclust(hclust_avg , k = 2, border = c(2,4))
+
+dist_mat <- dist(t(counts_logged), method="euclidean")
+hclust_avg <- hclust(dist_mat, method = 'complete')
+cut_avg_2 <- cutree(hclust_avg, k = 2)
+plot(hclust_avg)
+rect.hclust(hclust_avg , k = 2, border = c(2,4))
+
+table(as.numeric(cut_avg_1), as.numeric(cut_avg_2))
+```
+
+
+GOM cluster 1 samples are assigned to 1 or 2 in hierarchical clustering.
+
+```{r}
+all.equal(rownames(pData(obj)), names(cut_avg_1))
+
+table(pData(obj)$GOM, as.numeric(cut_avg_1))
+```
+
+
+Total tax count and cluster membership
+
+```{r}
+plot(cut_avg_1, colSums(MRcounts(MRobj,norm=T,log=F)))
+t.test(colSums(MRcounts(MRobj,norm=T,log=F)) ~ cut_avg_1)
+```
+
+
+Output hierarchical clustereing results.
+
+```{r, eval=F}
+df <- data.frame(sample=names(cut_avg_1),
+                 clust=cut_avg_1)
+
+write.csv(df,
+            file= "output-manuscript/supp-clusterig.csv",
+            quote=F, row.names=F)
+```
+
+
+
+---
+
+## Principal component analysis
+
+PC on logged and normed counts 
+
+```{r}
+MRobj <- readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
+counts_logged <- MRcounts(MRobj,norm=T,log=T)
+colnames(counts_logged) <- colnames(MRobj)
+
+obj <- readRDS("../data/nasal_GOM.rds")
+pdata <- pData(obj)
+
+
+pc_res <- prcomp(t(counts_logged+.5), scale=T)
+
+head((pc_res$sdev^2)/sum(pc_res$sdev^2))
+
+plot(pc_res$x[,1],pc_res$x[,2],
+     col=pData(obj)$GOM, main="sample labeled by hierarchical clustering results")  
+
+plot(pc_res$x[,1],pc_res$x[,2], xlim=c(-20,20), ylim=c(-20,20),
+     col=pData(obj)$GOM, main="sample labeled by hierarchical clustering results")  
+
+plot(pc_res$x[,1],pc_res$x[,2],
+     col=cut_avg_1, main="sample labeled by hierarchical clustering results")  
+table(as.numeric(cut_avg_1), as.numeric(cut_avg_2))
+```
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
