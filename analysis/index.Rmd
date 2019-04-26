@@ -14,6 +14,7 @@ Share results of nasal microbiome project.
     * [GOM cluster memberships under different seeds](gom-seeds.html)
     * [Grades of membership model finalized](step3_gradesOfMembership.html)
     * [Variance explained under different k](cluster-variance-explained.html)
+    * [Clustering using hierarchical clustering](cluster-alternative-methods.html)
   
 * Cluster characteristics
     * [Stacked bar plot of abundance](stacked_bar_plots.html)
@@ -24,7 +25,7 @@ Share results of nasal microbiome project.
     * [At the species level](differential_abundance.html)
     * [At higher phylogenetic taxa level](differential_abundance_higher_order.html)
 
-* [Applying GoM to HMP data](hmp.html)
+* Applying GoM to HMP data [Results](hmp.html)
 
 ---
 
