@@ -29,37 +29,24 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 
 ---
 
-## Objectives
+## Summary
 
-* Applying GoM to HMP data. 
+* Objectives
+    * Applying GoM to HMP data. 
+    * Compare K=2-5 GoM profile and Taxa profile with that in our data.
 
-* Compare K=2-5 GoM profile and Taxa profile with that in our data.
+* Data curated by JNP. (data/anterior_nares.rds received on 2019/04/09)
 
-
----
-
-## Results
-
-* Run GoM on HMP anterio nares data 389 samples and 14,785 OTUs. After filtering (for features and samples), we have 1,506 OTUs OTUs and 370 samples. 
-
-* Read count corrected for sequencing run center at the Species level.
-
-* Run K=2-5.
-
+* Results
+    * HMP anterio nares data 146 samples and 5,130 OTUs. The data is summarized at the species level.
+    * PCA analysis shows expression variation (first PC) is associated with sequencing run center. We thus fitted a linear model on the sample read counts and removed sample differences due to sequencing run center. 
+    * Cluster analysis (GoM) K=2-5.
 
 ---
 
-## HMP data analysis
+## Preprocessing 
 
-* Data curated by JNP.
-
-* Analyzed 389 samples collecetd from "anterior nares". 
-
-* Run center is known to be associated with batch effects.
-
-
-
-### Filtering
+Filtering
 
 ```{r}
 library(metagenomeSeq)
@@ -68,11 +55,10 @@ library(CountClust)
 
 ```{r, eval=F}
 library(metagenomeSeq)
-load("../data/hmp.rdata")
 
-MRobj <- hmp[,pData(hmp)$HMPbodysupersite == "Airways"]
+MRobj <- readRDS("data/anterior_nares.rds")
 
-# filtering
+# filtering ------
 MRobj_count <- MRcounts(MRobj, norm=F, log=F)
 
 # keep features present (>0 read) in at least 1% of the samples
@@ -94,52 +80,70 @@ MRobj_filtered <- MRobj_filtered[,keep_sample]
 dim(MRobj_filtered)
 ```
 
-### Batch correction
+Batch correction: Correcr for run center effect
 
 ```{r, eval=F}
-obj <- aggTax(MRobj_filtered,lvl="species")
+table(pData(MRobj_filtered)$RUNCENTER)
+
+pca_res <- prcomp(t(MRcounts(MRobj_filtered, log = T)), scale=T)
+
+head((pca_res$sdev^2)/sum(pca_res$sdev^2))
+
+plot(pca_res$x[,1],pca_res$x[,2],
+     col=as.integer(pData(MRobj_filtered)$visitno))
+plot(pca_res$x[,1],pca_res$x[,2],
+     col=as.integer(pData(MRobj_filtered)$RUNCENTER))
+
+for (i in 1:2) {
+  print(summary(lm(pca_res$x[,i] ~ as.factor(pData(MRobj_filtered)$visitno))))
+}
+for (i in 1:2) {
+  print(summary(lm(pca_res$x[,i] ~ as.factor(pData(MRobj_filtered)$RUNCENTER))))
+}
+for (i in 1:2) {
+  print(summary(lm(pca_res$x[,i] ~ as.factor(pData(MRobj_filtered)$sex))))
+}
+```
+
+
+Output filtered, normalized, batch-corrected counts.
+
+```{r, eval=F}
+obj <- MRobj_filtered
 obj@expSummary$expSummary$normFactors <- normFactors(MRobj_filtered)
 
 counts <- t(MRcounts(obj,norm=FALSE,log=FALSE))
 batchcorrect_counts <- BatchCorrectedCounts(counts,
                                          batch_lab = factor(pData(MRobj_filtered)$RUNCENTER),
                                          use_parallel=FALSE)
-counts = t(batchcorrect_counts)
+counts <- t(batchcorrect_counts)
 
 assayData(obj)[["counts"]] = counts
-#obj
-```
 
-Output filtered, normalized, batch-corrected counts.
 
-```{r, eval=F}
-saveRDS(obj, file="../data/hmp_processed.rds")
+saveRDS(obj, file="output/hmp.Rmd/hmp_updated_processed.rds")
 ```
 
 ---
 
-### GoM clustering
+## GoM clustering
 
 Try 100 random seeds. 
 
+Compare counts after library size normalization only and after cumulative normalization + library size normalization.
+
 ```{r, eval=F}
-obj <- readRDS(file="../data/hmp_processed.rds")
+obj <- readRDS(file="output/hmp.Rmd/hmp_updated_processed.rds")
 
+# library size normalization via CountClust ---------------------------
 library(CountClust)
-
-
 # fit GoM
-MRobj_species <- aggTax(obj,lvl="species")
-counts <- MRcounts(MRobj_species,norm=FALSE,log=FALSE)
-clust_2 <- FitGoM(t(counts), K=c(2), tol=0.00001, num_trials = 100)
-clust_3 <- FitGoM(t(counts), K=c(3), tol=0.00001, num_trials = 100)
-clust_4 <- FitGoM(t(counts), K=c(4), tol=0.00001, num_trials = 100)
-clust_5 <- FitGoM(t(counts), K=c(5), tol=0.00001, num_trials = 100)
-# clust_6 <- FitGoM(t(counts), K=c(6), tol=0.00001, num_trials = 100)
-# clust_7 <- FitGoM(t(counts), K=c(7), tol=0.00001, num_trials = 100)
-# clust_8 <- FitGoM(t(counts), K=c(8), tol=0.00001, num_trials = 100)
-# clust_9 <- FitGoM(t(counts), K=c(9), tol=0.00001, num_trials = 100)
-# clust_10 <- FitGoM(t(counts), K=c(10), tol=0.00001, num_trials = 100)
+#MRobj_species <- aggTax(obj,lvl="species")
+counts <- MRcounts(obj,norm=FALSE,log=FALSE)
+clust_2 <- FitGoM(t(counts), K=c(2), tol=100, num_trials = 100)
+clust_3 <- FitGoM(t(counts), K=c(3), tol=100, num_trials = 100)
+clust_4 <- FitGoM(t(counts), K=c(4), tol=100, num_trials = 100)
+clust_5 <- FitGoM(t(counts), K=c(5), tol=100, num_trials = 100)
 
 fits <- list(clust_2$fit, clust_3$fit, clust_4$fit, clust_5$fit)
 membership <- lapply(fits, function(xx) {
@@ -147,33 +151,49 @@ membership <- lapply(fits, function(xx) {
   })
 names(membership) <- paste0("clust_", c(2:5))
 
-saveRDS(fits, file = "../output/hmp.Rmd/hmp_clusters.rds")
-saveRDS(membership, file = "../output/hmp.Rmd/hmp_clusters_membership.rds")
+saveRDS(fits, file = "output/hmp.Rmd/hmp_updated_clusters.rds")
+saveRDS(membership, file = "output/hmp.Rmd/hmp_updated_clusters_membership.rds")
+
+
+
+# cumNorm plus library size normalization ----------------------------
+library(CountClust)
+# fit GoM
+#MRobj_species <- aggTax(obj,lvl="species")
+obj <- readRDS(file="output/hmp.Rmd/hmp_updated_processed.rds")
+counts <- MRcounts(obj,norm=T,log=FALSE)
+clust_2 <- FitGoM(t(counts), K=c(2), tol=100, num_trials = 100)
+clust_3 <- FitGoM(t(counts), K=c(3), tol=100, num_trials = 100)
+clust_4 <- FitGoM(t(counts), K=c(4), tol=100, num_trials = 100)
+clust_5 <- FitGoM(t(counts), K=c(5), tol=100, num_trials = 100)
+
+fits <- list(clust_2$fit, clust_3$fit, clust_4$fit, clust_5$fit)
+membership <- lapply(fits, function(xx) {
+     apply(xx$omega, 1, which.max)
+  })
+names(membership) <- paste0("clust_", c(2:5))
+
+saveRDS(fits, file = "output/hmp.Rmd/hmp_updated_clusters_norm2.rds")
+saveRDS(membership, file = "output/hmp.Rmd/hmp_updated_clusters_membership_norm2.rds")
 ```
+
+Compare results between the two normalization. 
+
+```{r, eval=F}
+membership <- readRDS(file = "output/hmp.Rmd/hmp_updated_clusters_membership.rds")
+membership_norm2 <- readRDS(file = "output/hmp.Rmd/hmp_updated_clusters_membership_norm2.rds")
+
+table(membership$clust_2, membership_norm2$clust_2)
+```
+
 
 GoM results
 
-```{r}
-fits <- readRDS("../output/hmp.Rmd/hmp_clusters.rds")
-membership <- readRDS("../output/hmp.Rmd/hmp_clusters_membership.rds")
-# log bayes keeps increasing
-plot(y=sapply(fits, function(x) x$BF),
-     x=as.integer(c(2:5), pch=16),
-     ylab="log Bayes Factor", axes = F, xlab="Clusters")
-axis(1, at=c(1:6))
-axis(2)
+```{r, eval=F}
+fits <- readRDS("../output/hmp.Rmd/hmp_updated_clusters_norm2.rds")
+membership <- readRDS("../output/hmp.Rmd/hmp_updated_clusters_membership_norm2.rds")
 
-
-table(membership$clust_2)
-table(membership$clust_3)
-table(membership$clust_4)
-table(membership$clust_5)
-
-
-fits <- readRDS("../output/hmp.Rmd/hmp_clusters.rds")
-membership <- readRDS("../output/hmp.Rmd/hmp_clusters_membership.rds")
-
-pdf("../output/hmp.Rmd/hmp_clusts_structure.pdf")
+pdf("output/hmp.Rmd/hmp_updated_clusts_structure_norm2.pdf")
 for (i in 1:length(fits)) {
   annotation <- data.frame(
   sample_id = paste0("X", c(1:NROW(fits[[i]]$omega))),
@@ -200,148 +220,39 @@ Taxonomical profile
 ```{r, eval=F}
 library(reshape2)
 
-obj <- readRDS(file="../data/hmp_processed.rds")
+obj <- readRDS(file="output/hmp.Rmd/hmp_updated_processed.rds")
+membership <- readRDS("output/hmp.Rmd/hmp_updated_clusters_membership_norm2.rds")
 
 # code from code/figs-paulson-04212018.R
-pdf("../output/hmp.Rmd/hmp_clusts_taxa.pdf")
+pdf("output/hmp.Rmd/hmp_clusts_taxa.pdf")
 
-pp <- plotBar(obj,lvl='genus',cl=membership$clust_2,n=20)
+pp <- plotBar(obj,lvl='Genus',cl=membership$clust_2,n=20)
 
+# aggregated barplot
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 cols <- getPalette(21)
-plotBar.aggregate(obj[,order(colnames(obj))],lvl='genus',n=20,
-                  plot.factor_levels = levels(pp$dd$variable))$p +
-  scale_fill_manual(values = cols) + xlab('Samples') +
-  guides(fill=guide_legend(ncol=1))
-
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(obj,lvl='genus',cl=membership$clust_2,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-  
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(obj,lvl='genus',cl=membership$clust_3,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(obj,lvl='genus',cl=membership$clust_4,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(obj,lvl='genus',cl=membership$clust_5,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-  
-dev.off()
-```
-
-
----
-
-
-## Current data
-
-See [Grades of membership model finalized](step3_gradesOfMembership.html) for the results.
-
-
-```{r, eval=F}
-counts_clust <- readRDS(file = "../data/count-clust.rds")
-
-
-MRobj = readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
-counts <- MRcounts(MRobj,norm=FALSE,log=FALSE)
-nasal_clust3 <- FitGoM(t(counts), K=c(3), tol=0.00001, num_trials = 100)
-nasal_clust4 <- FitGoM(t(counts), K=c(4), tol=0.00001, num_trials = 100)
-nasal_clust5 <- FitGoM(t(counts), K=c(5), tol=0.00001, num_trials = 100)
-
-
-fits <- list(counts_clust$clust_2, nasal_clust3$fit, nasal_clust4$fit, nasal_clust5$fit)
-membership <- lapply(fits, function(xx) {
-     apply(xx$omega, 1, which.max)
-  })
-names(membership) <- c("clust_2", "clust_3", "clust_4", "clust_5")
-
-saveRDS(fits, file = "../output/hmp.Rmd/nasal_clust.rds")
-saveRDS(membership, file = "../output/hmp.Rmd/nasal_clust_membership.rds")
-```
-
-```{r}
-fits <- readRDS("../output/hmp.Rmd/nasal_clust.rds")
-membership <- readRDS("../output/hmp.Rmd/nasal_clust_membership.rds")
-table(membership$clust_2)
-table(membership$clust_3)
-table(membership$clust_4)
-table(membership$clust_5)
-
-
-pdf("../output/hmp.Rmd/nasal_clusts_structure.pdf")
-for (i in 1:length(fits)) {
-  annotation <- data.frame(
-  sample_id = paste0("X", c(1:NROW(fits[[i]]$omega))),
-  tissue_label = factor(membership[[i]],
-                        levels = as.character(1:(i+1)) ) ) 
-  rownames(fits[[i]]$omega) <- annotation$sample_id
-  print(StructureGGplot(omega = fits[[i]]$omega,
-                  annotation = annotation,
-                  palette = RColorBrewer::brewer.pal(i+1, "Accent"),
-                  yaxis_label = "Group",
-                  order_sample = TRUE,
-                  axis_tick = list(axis_ticks_length = .1,
-                                   axis_ticks_lwd_y = .1,
-                                   axis_ticks_lwd_x = .1,
-                                   axis_label_size = 7,
-                                   axis_label_face = "bold")) )
-}
-dev.off()
-```
-
-nasal analysis
-
-```{r, eval=F}
-MRobj = readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
-membership <- readRDS("../output/hmp.Rmd/nasal_clust_membership.rds")
-
-pdf("../output/hmp.Rmd/nasal_clusts_taxa.pdf", width=10)
-
-# get factor levels
-pp <- plotBar.aggregate(MRobj[,order(colnames(MRobj))],lvl='Genus',n=20,
+hmp_fig1 <- plotBar.aggregate(obj[,order(colnames(obj))],lvl='Genus',n=20,
                   plot.factor_levels = levels(pp$dd$variable))
-labs <- c(levels(pp$dd$variable)[-which(levels(pp$dd$variable)=="Other")], "Other")
+hmp_fig1$p + scale_fill_manual(values = cols) + xlab('Samples') +
+  guides(fill=guide_legend(ncol=1)) +
+  theme(legend.position = "none")
+hmp_fig1$p + scale_fill_manual(values = cols) + xlab('Samples') +
+  guides(fill=guide_legend(ncol=1)) 
+write.csv(hmp_fig1$dd,
+            file= "output/hmp.Rmd/hmp_prop_agg.csv",
+            row.names=F)
 
+# barplot by cluster membership
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 cols <- getPalette(21)
-plotBar.aggregate(MRobj[,order(colnames(MRobj))],lvl='Genus',n=20,
-                  plot.factor_levels = labs)$p +
-  scale_fill_manual(values = cols) + xlab('Samples') +
-#  theme(legend.text=element_text(size=7)) +
-  guides(fill=guide_legend(ncol=1))
+hmp_fig2 <- plotBar(obj,lvl='Genus',cl=membership$clust_2,n=20)
+hmp_fig2$p + scale_fill_manual(values = getPalette(21)) +
+  guides(fill=guide_legend(ncol=1)) + 
+  theme(legend.position = "none")
+write.csv(hmp_fig2$dd,
+            file= "output/hmp.Rmd/hmp_prop_agg_clust2.csv",
+            row.names=F)
 
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(MRobj,lvl='Genus',cl=membership$clust_2,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-
-  
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(MRobj,lvl='Genus',cl=membership$clust_3,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-  
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(MRobj,lvl='Genus',cl=membership$clust_4,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
-  
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(MRobj,lvl='Genus',cl=membership$clust_5,n=20)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill=guide_legend(ncol=1))
 
 dev.off()
 ```
