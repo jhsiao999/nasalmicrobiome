@@ -31,12 +31,16 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 
 ## Summary
 
-* Apply non-model-based approaches to cluster samples
-
+* Apply hierarchical clustering to cluster samples
+* Try different distance metrics
+    + Euclidean on logged and normed counts
+    + Center log ratio transform
+    + Bray-Curtis on sample proportions
+    
 
 ---
 
-## Hierarchical clustering
+## Euclidean on logged and normed counts
 
 On logged and normed counts. Complete and average distance give the same results. 
 
@@ -46,33 +50,15 @@ MRobj <- readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
 counts_logged <- MRcounts(MRobj,norm=T,log=T)
 colnames(counts_logged) <- colnames(MRobj)
 
-obj <- readRDS("../data/nasal_GOM.rds")
-pdata <- pData(obj)
-
-dist_mat <- dist(t(counts_logged), method="euclidean")
-hclust_avg <- hclust(dist_mat, method = 'average')
-cut_avg_1 <- cutree(hclust_avg, k = 2)
-plot(hclust_avg)
-rect.hclust(hclust_avg , k = 2, border = c(2,4))
-
 dist_mat <- dist(t(counts_logged), method="euclidean")
 hclust_avg <- hclust(dist_mat, method = 'complete')
-cut_avg_2 <- cutree(hclust_avg, k = 2)
+cut_avg_1 <- cutree(hclust_avg, k = 2)
+table(cut_avg_1)
 plot(hclust_avg)
 rect.hclust(hclust_avg , k = 2, border = c(2,4))
 
-table(as.numeric(cut_avg_1), as.numeric(cut_avg_2))
+#saveRDS(cut_avg_1, file = "output/cluster-alternative-methods.Rmd/cut_res_1.rds")
 ```
-
-
-GOM cluster 1 samples are assigned to 1 or 2 in hierarchical clustering.
-
-```{r}
-all.equal(rownames(pData(obj)), names(cut_avg_1))
-
-table(pData(obj)$GOM, as.numeric(cut_avg_1))
-```
-
 
 Total tax count and cluster membership
 
@@ -82,50 +68,98 @@ t.test(colSums(MRcounts(MRobj,norm=T,log=F)) ~ cut_avg_1)
 ```
 
 
-Output hierarchical clustereing results.
-
-```{r, eval=F}
-df <- data.frame(sample=names(cut_avg_1),
-                 clust=cut_avg_1)
-
-write.csv(df,
-            file= "output-manuscript/supp-clusterig.csv",
-            quote=F, row.names=F)
-```
 
 
 
----
 
-## Principal component analysis
 
-PC on logged and normed counts 
+## Center log ratio transform
+
+On normed counts. 
 
 ```{r}
+library(metagenomeSeq)
 MRobj <- readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
-counts_logged <- MRcounts(MRobj,norm=T,log=T)
-colnames(counts_logged) <- colnames(MRobj)
+counts <- MRcounts(MRobj,norm=T,log=F)
+colnames(counts) <- colnames(MRobj)
 
-obj <- readRDS("../data/nasal_GOM.rds")
-pdata <- pData(obj)
+library(compositions)
+counts_clr <- t(counts)
 
+# use cutree to determine sample cluster membership
+dist_mat <- dist(counts_clr, method="euclidean")
+hclust_avg <- hclust(dist_mat, method = 'complete')
+cut_avg_2 <- cutree(hclust_avg, k = 2)
+table(cut_avg_2)
+plot(hclust_avg)
+rect.hclust(hclust_avg , k = 2, border = c(2,4))
 
-pc_res <- prcomp(t(counts_logged+.5), scale=T)
-
-head((pc_res$sdev^2)/sum(pc_res$sdev^2))
-
-plot(pc_res$x[,1],pc_res$x[,2],
-     col=pData(obj)$GOM, main="sample labeled by hierarchical clustering results")  
-
-plot(pc_res$x[,1],pc_res$x[,2], xlim=c(-20,20), ylim=c(-20,20),
-     col=pData(obj)$GOM, main="sample labeled by hierarchical clustering results")  
-
-plot(pc_res$x[,1],pc_res$x[,2],
-     col=cut_avg_1, main="sample labeled by hierarchical clustering results")  
-table(as.numeric(cut_avg_1), as.numeric(cut_avg_2))
+#saveRDS(cut_avg_2, file = "output/cluster-alternative-methods.Rmd/cut_res_2.rds")
 ```
 
 
+
+
+
+## Bray-Curtis on sample proportions
+
+
+```{r}
+library(metagenomeSeq)
+MRobj <- readRDS("../data/nasal_filtered_normed_batchcorrected.rds")
+counts <- MRcounts(MRobj,norm=T,log=F)
+colnames(counts) <- colnames(MRobj)
+
+library(vegan)
+mat_prop <- t(t(counts)/colSums(counts))
+beta_bray <- vegdist(t(mat_prop), method = "bray", upper=T)
+
+# use cutree to determine sample cluster membership
+#dist_mat <- dist(t(counts_clr), method="euclidean")
+hclust_avg <- hclust(beta_bray, method = 'complete')
+cut_avg_3 <- cutree(hclust_avg, k = 2)
+table(cut_avg_3)
+plot(hclust_avg)
+rect.hclust(hclust_avg , k = 2, border = c(2,4))
+
+#saveRDS(cut_avg_3, file = "output/cluster-alternative-methods.Rmd/cut_res_3.rds")
+```
+
+
+##  Output hierarchical clustereing results.
+
+```{r, eval=T}
+cut_avg_1 <- readRDS(file = "../output/cluster-alternative-methods.Rmd/cut_res_1.rds")
+cut_avg_2 <- readRDS(file = "../output/cluster-alternative-methods.Rmd/cut_res_2.rds")
+cut_avg_3 <- readRDS(file = "../output/cluster-alternative-methods.Rmd/cut_res_3.rds")
+
+all.equal(names(cut_avg_1), names(cut_avg_2))
+all.equal(names(cut_avg_1), names(cut_avg_3))
+
+df <- data.frame(sample=names(cut_avg_1),
+                 method1=cut_avg_1,
+                 method2=cut_avg_2,
+                 method3=cut_avg_3)
+
+# write.csv(df,
+#             file= "../output-manuscript/supp-clusterig.csv",
+#             quote=F, row.names=F)
+
+table(df$method1)
+table(df$method2)
+table(df$method3)
+
+table(df$method1, df$method3)
+table(df$method1, df$method3)
+
+obj <- readRDS("../data/nasal_GOM.rds")
+gom <- pData(obj)$GOM
+names(gom) <- rownames(pData(obj))
+
+table(gom, df$method1)
+table(gom, df$method2)
+table(gom, df$method3)
+```
 
 
 ---
