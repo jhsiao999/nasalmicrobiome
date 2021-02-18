@@ -1,4 +1,4 @@
-# Date: 04-24-2019
+# Date: 02-17-2020
 #
 # Document and reproduce figures/data for the paper
 #
@@ -8,7 +8,6 @@ library(matrixStats)
 library(dplyr)
 library(ggplot2)
 library(vegan)
-#library(rafalib)
 library(reshape2)
 library(devtools)
 library(metagenomeSeq)
@@ -57,24 +56,49 @@ plotBar.aggregate <- function(obj, lvl, plot.factor_levels=NULL,
 }
 
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/proportion_sample_allaggregate.pdf",
-    width=12,height=6)
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig1a_proportion_sample_allaggregate.pdf",
+    width=5,height=6)
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 cols <- getPalette(21)
 fig1_a <- plotBar.aggregate(obj[,order(colnames(obj))],lvl='Genus',n=20)
+labs = as.vector(sapply(levels(fig1_a$p$data$variable), function(x) {
+  #strsplit(x, split = "_")[[1]]
+  tmp = strsplit(x, split = c("_"))[[1]]
+  if (length(tmp) == 1) out = "Other"
+  if (length(tmp) == 3) out = tmp[3]
+  if (length(tmp) > 3) {
+    tmp2 = paste0("Uncl_", tmp[length(tmp)-1])
+    out = strsplit(tmp2, split = ";")[[1]][1]
+  }
+  return(out)
+  }))
+
+fig1_a$p$data$variable = factor(fig1_a$p$data$variable,
+                                levels = levels(fig1_a$p$data$variable)[c(1,3:21,2)],
+                                labels = labs[c(1,3:21,2)])
 
 print(
   fig1_a$p + scale_fill_manual(values = cols) + xlab('Samples') +
-  ylab("Genus Proportion") +
+  ylab("Relative Abundance") +
   xlab("All Samples") +
+  theme_bw() +
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
-  guides(fill = guide_legend(title = "", title.position = "left", ncol=1))
+  theme(#axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 14),
+        legend.key.size = unit(.5, 'cm'),
+        legend.text = element_text(size=6)) +
+  guides(fill = guide_legend(title = "Taxa",
+                             title.position = "top", ncol=1)) +
+    ggtitle("Figure 1A. Relative abundance of top 20 taxa \n to the genus level (aggregate data")
 )
 dev.off()
 
 
-# Figure 1 corresponding data table ----------------
+
+
+# Figure 1A corresponding data table ----------------
 obj = readRDS("data/nasal_GOM.rds")
 obj <- obj[,order(pData(obj)$GOM)]
 
@@ -106,8 +130,7 @@ write.table(dd,
 # lvl='Genus'
 # n=20
 # plot.factor_levels = var_factor
-
-pp <- plotBar(obj[,order(colnames(obj))],lvl='Genus',cl=membership$clust_2,n=20)
+#pp <- plotBar(obj[,order(colnames(obj))],lvl='Genus',cl=membership$clust_2,n=20)
 
 
 plotBar <- function(obj, lvl, plot.factor_levels=NULL,
@@ -171,33 +194,26 @@ fig_a_dd <- plotBar.aggregate(obj[,order(colnames(obj))],lvl='Genus',n=20)$dd
 labs <- as.character(fig_a_dd$variable)
 var_factor <- levels(fig_a_dd$variable)
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/proportion_sample.pdf",
-    width=15,height=7)
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig1b_sample_proportion_individual.pdf",
+    width=12,height=7)
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 cols <- getPalette(21)
 plotBar(obj[,order(colnames(obj))],lvl='Genus',n=20, plot.factor_levels = var_factor)$p +
   scale_fill_manual(values = getPalette(21)) + xlab('Samples') +
-  theme(legend.position = "none")
+  theme_classic() + coord_fixed(ratio = 60) + theme(legend.position = "none") +
+  ylab("Relative Abundance") + xlab("Individual Samples") +
+  theme(axis.text.x = element_text(size = 4, angle = 90),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 14)) +
+  ggtitle("Figure 1B. Relative abundance of to 20 taxa to the genus level (aggregate data)")
 #  guides(fill = guide_legend(title = "", title.position = "left", ncol=1))
 dev.off()
 
 
 
-# Figure 2 --------------------------------
-# sample proportions by GOM membership
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/proportion_sample_gom.pdf",
-    width=12,height=8)
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-plotBar(obj,lvl='Genus',cl=pData(obj)$GOM,n=20, plot.factor_levels = var_factor)$p +
-  scale_fill_manual(values = getPalette(21)) +
-  guides(fill = guide_legend(title = "", title.position = "left", ncol=1)) +
-  xlab("Cluster Membership") + theme_light()
-dev.off()
 
 
-
-
-# Figure 3A ------------------------------
+#--- Figure 2A
 # Shannon diversity between groups
 library(data.table)
 shannon_values <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv")
@@ -207,7 +223,7 @@ all.equal(shannon_values$V1, colnames(obj))
 shannon_values$cluster <- obj$GOM
 wilcox.test(shannon_values$V2 ~ shannon_values$cluster)
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/alpha_diversity.pdf",
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig2a_alpha_diversity.pdf",
     width=4,heigh=3)
 #pcares <- pcaRES(obj,pch=21,bg=pData(obj)$GOM,main="")
 H = diversity(t(MRcounts(obj)))
@@ -222,14 +238,24 @@ ggplot(data.frame(H=H,gom=gom), aes(x=gom, y = H, fill = gom)) +
   scale_x_discrete(name = "Cluster membership",
                    labels = c("Group 1", "Group 2")) +
   guides(fill=guide_legend(title=""), title.position = "top") +
-  ggtitle("Alpha (Shannon) diversity")
+  ggtitle("Figure 2A. Microbiome diversity metrics \n by cluster class: Alpha (Shannon) diversity") +
+  theme(axis.text.x = element_text(size = 6),
+        axis.text.y = element_text(size = 6),
+        axis.title = element_text(size = 8)) +
+  geom_text(
+    label="P <.001",
+    x=1.5,
+    y=3.6,
+#    label.padding = unit(0.55, "lines"), # Rectangle size around label
+    size = 3
+  )
 dev.off()
 
 
 
 
 
-# Figure 3B ------
+#--- Figure 2B
 # Bray-Curtis similarity
 MRobj <- readRDS("data/nasal_filtered_normed_batchcorrected.rds")
 counts <- MRcounts(MRobj,norm=T,log=T)
@@ -257,8 +283,9 @@ beta_group2 <- lapply(1:length(group2), function(n) {
 })
 
 
+wilcox.test(df$beta~df$clust)
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/beta_diversity_mean.pdf",
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig2b_beta_diversity_mean.pdf",
     width=4,heigh=3)
 beta_group1_mn <- sapply(1:length(group1), function(n) {
   mean(beta_bray[which(rownames(beta_bray)==group1[n]),
@@ -283,6 +310,119 @@ ggplot(df, aes(x=clust, y = beta, fill = clust)) +
   scale_x_discrete(name = "Cluster membership",
                    labels = c("Group 1", "Group 2")) +
   guides(fill=guide_legend(title="")) +
-  ggtitle("Beta (Bray-Curtis) diversity")
-wilcox.test(df$beta~df$clust)
+  ggtitle("Figure 2B. Microbiome diversity metrics \n by cluster class: Beta (Bray-Curtis) diversity") +
+  theme(axis.text.x = element_text(size = 6),
+        axis.text.y = element_text(size = 6),
+        axis.title = element_text(size = 8)) +
+  geom_text(
+    label="P <1E-15",
+    x=1.5,
+    y=3.6,
+    #    label.padding = unit(0.55, "lines"), # Rectangle size around label
+    size = 3
+  )
+dev.off()
+
+
+
+
+#---Figure 2C: PCA
+pcaRES <- function(obj,tran=TRUE,comp=1:2,norm=TRUE,log=TRUE,usePCA=TRUE,
+                   useDist=FALSE,distfun=stats::dist,dist.method="euclidian",n=NULL,...){
+  mat = returnAppropriateObj(obj,norm,log)
+  if(useDist==FALSE & usePCA==FALSE) stop("Classical MDS requires distances")
+  if(is.null(n)) n = min(nrow(mat),1000)
+
+  otusToKeep <- which(rowSums(mat)>0)
+  otuVars<-rowSds(mat[otusToKeep,])
+  otuIndices<-otusToKeep[order(otuVars,decreasing=TRUE)[seq_len(n)]]
+  mat <- mat[otuIndices,]
+
+  if(tran==TRUE){
+    mat = t(mat)
+  }
+  if(useDist==TRUE){
+    d <- distfun(mat,method=dist.method)
+  } else{ d = mat }
+
+  if(usePCA==FALSE){
+    ord = cmdscale(d,k = max(comp))
+    xl = paste("MDS component:",comp[1])
+    yl = paste("MDS component:",comp[2])
+  } else{
+    pcaRes <- prcomp(d)
+    ord <- pcaRes$x
+    vars <- pcaRes$sdev^2
+    vars <- round(vars/sum(vars),5)*100
+    xl <- sprintf("PCA %s: %.2f%% variance",colnames(ord)[comp[1]], vars[comp[1]])
+    yl <- sprintf("PCA %s: %.2f%% variance",colnames(ord)[comp[2]], vars[comp[2]])
+  }
+  return(pcaRes)
+}
+
+
+plotOrd2 = function(obj,tran=TRUE,comp=1:2,norm=TRUE,log=TRUE,usePCA=TRUE,useDist=FALSE,distfun=stats::dist,dist.method="euclidian",n=NULL,...){
+  mat = returnAppropriateObj(obj,norm,log)
+  if(useDist==FALSE & usePCA==FALSE) stop("Classical MDS requires distances")
+  if(is.null(n)) n = min(nrow(mat),1000)
+
+  otusToKeep <- which(rowSums(mat)>0)
+  otuVars<-rowSds(mat[otusToKeep,])
+  otuIndices<-otusToKeep[order(otuVars,decreasing=TRUE)[seq_len(n)]]
+  mat <- mat[otuIndices,]
+
+  if(tran==TRUE){
+    mat = t(mat)
+  }
+  if(useDist==TRUE){
+    d <- distfun(mat,method=dist.method)
+  } else{ d = mat }
+
+  if(usePCA==FALSE){
+    ord = cmdscale(d,k = max(comp))
+    xl = paste("MDS component:",comp[1])
+    yl = paste("MDS component:",comp[2])
+  } else{
+    pcaRes <- prcomp(d)
+    ord <- pcaRes$x
+    vars <- pcaRes$sdev^2
+    vars <- round(vars/sum(vars),5)*100
+    xl <- sprintf("PCA %s: %.2f%% variance",colnames(ord)[comp[1]], vars[comp[1]])
+    yl <- sprintf("PCA %s: %.2f%% variance",colnames(ord)[comp[2]], vars[comp[2]])
+  }
+
+  plot(ord[,comp],ylab=yl,xlab=xl,...)
+  invisible(ord[,comp])
+}
+
+
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig2c_pca.pdf",
+    width=8,height=8)
+pcares <- pcaRES(obj,pch=21,bg=pData(obj)$GOM,main="")
+varprop <- (pcares$sdev^2)/sum((pcares$sdev^2))
+#  plotOrd(obj,pch=21,bg=pData(obj)$GOM,main="Principal Component Analysis")
+k = plotOrd2(obj,pch=21,bg=pData(obj)$GOM,comp = 1:4,
+             main="Principal Component Analysis")
+pairs(k,pch=21,bg=pData(obj)$GOM,
+      main="",
+      labels = c("PC1: 9.45%", "PC2: 8.62%", "PC3: 4.40%", "PC4: 4.28%"))
+mtext(side=3, line=1.7, at=0.05, adj=0, cex=1.3, font = 2,
+      "Figure 2C. Microbiome diversity metrics \n by cluster class: Principal Component Analysis")
+dev.off()
+
+
+
+
+
+
+
+# Supp? Figure 2 --------------------------------
+# sample proportions by GOM membership
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/proportion_sample_gom.pdf",
+    width=12,height=8)
+getPalette = colorRampPalette(brewer.pal(9, "Set1"))
+plotBar(obj,lvl='Genus',cl=pData(obj)$GOM,n=20, plot.factor_levels = var_factor)$p +
+  scale_fill_manual(values = getPalette(21)) +
+  guides(fill = guide_legend(title = "", title.position = "left", ncol=1)) +
+  xlab("Cluster Membership") + theme_light()
 dev.off()
