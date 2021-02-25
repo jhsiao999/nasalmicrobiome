@@ -213,7 +213,7 @@ dev.off()
 
 
 
-#--- Figure 2A
+#--- eFigure 3A
 # Shannon diversity between groups
 library(data.table)
 shannon_values <- fread("~/Dropbox/current-projects/nasalMicrobiomeManuscript/draft-results/shannon_values.tsv")
@@ -223,7 +223,7 @@ all.equal(shannon_values$V1, colnames(obj))
 shannon_values$cluster <- obj$GOM
 wilcox.test(shannon_values$V2 ~ shannon_values$cluster)
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig2a_alpha_diversity.pdf",
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/efig3a_alpha_diversity.pdf",
     width=4,heigh=3)
 #pcares <- pcaRES(obj,pch=21,bg=pData(obj)$GOM,main="")
 H = diversity(t(MRcounts(obj)))
@@ -238,7 +238,7 @@ ggplot(data.frame(H=H,gom=gom), aes(x=gom, y = H, fill = gom)) +
   scale_x_discrete(name = "Cluster membership",
                    labels = c("Group 1", "Group 2")) +
   guides(fill=guide_legend(title=""), title.position = "top") +
-  ggtitle("Figure 2A. Microbiome diversity metrics \n by cluster class: Alpha (Shannon) diversity") +
+  ggtitle("eFigure 3A. Microbiome diversity metrics \n by cluster class: Alpha (Shannon) diversity") +
   theme(axis.text.x = element_text(size = 6),
         axis.text.y = element_text(size = 6),
         axis.title = element_text(size = 8)) +
@@ -255,7 +255,7 @@ dev.off()
 
 
 
-#--- Figure 2B
+#--- eFigure 3B
 # Bray-Curtis similarity
 MRobj <- readRDS("data/nasal_filtered_normed_batchcorrected.rds")
 counts <- MRcounts(MRobj,norm=T,log=T)
@@ -285,7 +285,7 @@ beta_group2 <- lapply(1:length(group2), function(n) {
 
 wilcox.test(df$beta~df$clust)
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig2b_beta_diversity_mean.pdf",
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/efig3b_beta_diversity_mean.pdf",
     width=4,heigh=3)
 beta_group1_mn <- sapply(1:length(group1), function(n) {
   mean(beta_bray[which(rownames(beta_bray)==group1[n]),
@@ -310,7 +310,7 @@ ggplot(df, aes(x=clust, y = beta, fill = clust)) +
   scale_x_discrete(name = "Cluster membership",
                    labels = c("Group 1", "Group 2")) +
   guides(fill=guide_legend(title="")) +
-  ggtitle("Figure 2B. Microbiome diversity metrics \n by cluster class: Beta (Bray-Curtis) diversity") +
+  ggtitle("eFigure 3B. Microbiome diversity metrics \n by cluster class: Beta (Bray-Curtis) diversity") +
   theme(axis.text.x = element_text(size = 6),
         axis.text.y = element_text(size = 6),
         axis.title = element_text(size = 8)) +
@@ -326,7 +326,7 @@ dev.off()
 
 
 
-#---Figure 2C: PCA
+#---eFigure 3C: PCA
 pcaRES <- function(obj,tran=TRUE,comp=1:2,norm=TRUE,log=TRUE,usePCA=TRUE,
                    useDist=FALSE,distfun=stats::dist,dist.method="euclidian",n=NULL,...){
   mat = returnAppropriateObj(obj,norm,log)
@@ -396,18 +396,18 @@ plotOrd2 = function(obj,tran=TRUE,comp=1:2,norm=TRUE,log=TRUE,usePCA=TRUE,useDis
 }
 
 
-pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/fig2c_pca.pdf",
+pdf("~/Dropbox/GitHub/nasalmicrobiome/output-manuscript/efig3c_pca.pdf",
     width=8,height=8)
 pcares <- pcaRES(obj,pch=21,bg=pData(obj)$GOM,main="")
 varprop <- (pcares$sdev^2)/sum((pcares$sdev^2))
 #  plotOrd(obj,pch=21,bg=pData(obj)$GOM,main="Principal Component Analysis")
 k = plotOrd2(obj,pch=21,bg=pData(obj)$GOM,comp = 1:4,
-             main="Principal Component Analysis")
+             main="eFigure 3c. Principal Component Analysis")
 pairs(k,pch=21,bg=pData(obj)$GOM,
       main="",
       labels = c("PC1: 9.45%", "PC2: 8.62%", "PC3: 4.40%", "PC4: 4.28%"))
 mtext(side=3, line=1.7, at=0.05, adj=0, cex=1.3, font = 2,
-      "Figure 2C. Microbiome diversity metrics \n by cluster class: Principal Component Analysis")
+      "eFigure 3C. Microbiome diversity metrics \n by cluster class: Principal Component Analysis")
 dev.off()
 
 
